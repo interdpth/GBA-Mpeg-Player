@@ -50,7 +50,207 @@ static int  Headers _ANSI_ARGS_((void));
 static void Initialize_Sequence _ANSI_ARGS_((void));
 static void Initialize_Decoder _ANSI_ARGS_((void));
 static void Deinitialize_Sequence _ANSI_ARGS_((void));
-static void Process_Options _ANSI_ARGS_((int argc, char* argv[]));
+static void Process_Options();
+
+
+//gba specific
+ /* the display control pointer points to the gba graphics register */
+volatile unsigned long* display_control = (volatile unsigned long*)0x4000000;
+#define MODE0 0x00
+#define BG0_ENABLE 0x100
+#define BG1_ENABLE 0x200
+#define BG2_ENABLE 0x400
+#define BG3_ENABLE 0x800
+
+/* the button register holds the bits which indicate whether each button has
+ * been pressed - this has got to be volatile as well
+ */
+volatile unsigned short* buttons = (volatile unsigned short*)0x04000130;
+
+/* the bit positions indicate each button - the first bit is for A, second for
+ * B, and so on, each constant below can be ANDED into the register to get the
+ * status of any one button */
+#define BUTTON_A (1 << 0)
+#define BUTTON_B (1 << 1)
+#define BUTTON_SELECT (1 << 2)
+#define BUTTON_START (1 << 3)
+#define BUTTON_RIGHT (1 << 4)
+#define BUTTON_LEFT (1 << 5)
+#define BUTTON_UP (1 << 6)
+#define BUTTON_DOWN (1 << 7)
+#define BUTTON_R (1 << 8)
+#define BUTTON_L (1 << 9)
+
+ /* the control registers for the four tile layers */
+volatile unsigned short* bg0_control = (volatile unsigned short*)0x4000008;
+volatile unsigned short* bg1_control = (volatile unsigned short*)0x400000a;
+volatile unsigned short* bg2_control = (volatile unsigned short*)0x400000c;
+volatile unsigned short* bg3_control = (volatile unsigned short*)0x400000e;
+
+/* palette is always 256 colors */
+#define PALETTE_SIZE 256
+
+/* the address of the color palette */
+volatile unsigned short* bg_palette = (volatile unsigned short*)0x5000000;
+
+/* define the timer control registers */
+volatile unsigned short* timer0_data = (volatile unsigned short*)0x4000100;
+volatile unsigned short* timer0_control = (volatile unsigned short*)0x4000102;
+
+/* make defines for the bit positions of the control register */
+#define TIMER_FREQ_1 0x0
+#define TIMER_FREQ_64 0x2
+#define TIMER_FREQ_256 0x3
+#define TIMER_FREQ_1024 0x4
+#define TIMER_ENABLE 0x80
+
+/* the GBA clock speed is fixed at this rate */
+#define CLOCK 16777216 
+#define CYCLES_PER_BLANK 280896
+
+/* turn DMA on for different sizes */
+#define DMA_ENABLE 0x80000000
+#define DMA_16 0x00000000
+#define DMA_32 0x04000000
+
+/* this causes the DMA destination to be the same each time rather than increment */
+#define DMA_DEST_FIXED 0x400000
+
+/* this causes the DMA to repeat the transfer automatically on some interval */
+#define DMA_REPEAT 0x2000000
+
+/* this causes the DMA repeat interval to be synced with timer 0 */
+#define DMA_SYNC_TO_TIMER 0x30000000
+
+/* pointers to the DMA source/dest locations and control registers */
+volatile unsigned int* dma1_source = (volatile unsigned int*)0x40000BC;
+volatile unsigned int* dma1_destination = (volatile unsigned int*)0x40000C0;
+volatile unsigned int* dma1_control = (volatile unsigned int*)0x40000C4;
+
+volatile unsigned int* dma2_source = (volatile unsigned int*)0x40000C8;
+volatile unsigned int* dma2_destination = (volatile unsigned int*)0x40000CC;
+volatile unsigned int* dma2_control = (volatile unsigned int*)0x40000D0;
+
+volatile unsigned int* dma3_source = (volatile unsigned int*)0x40000D4;
+volatile unsigned int* dma3_destination = (volatile unsigned int*)0x40000D8;
+volatile unsigned int* dma3_control = (volatile unsigned int*)0x40000DC;
+
+const uint RAWHEADER = 0x88FFFF00;
+const uint LZCOMPRESSEDHEADER = 0x88FFFF01;
+const uint INTERLACERLEHEADER = 0x88FFFF22;
+const uint INTERLACERLEHEADER2 = 0x88FFFF23;
+const uint DESCRIBEHEADER = 0x88FFFF03;
+const uint LUTHEADER = 0x88FFFF02;
+const uint DIFFHEADER = 0x88FFFF12;
+const uint QUADDIFFHEADER = 0x88FFFF13;
+const uint QUADDIFFHEADER2 = 0x88FFFF14;
+const uint RLEHEADER = 0x88FFFF15;
+const uint NINTYRLHEADERINTR = 0x88FFFF76;
+typedef struct
+{
+	unsigned long thesize;
+	unsigned long headervalue;
+	unsigned long size;
+	unsigned char* source;
+}CompFrame;
+
+//Frames don't have a type.
+typedef struct
+{
+	unsigned long* address;
+	unsigned long size;
+}VidFrame;
+
+
+
+/* copy data using DMA channel 3 (normal memory transfers) */
+void memcpy16_dma(unsigned short* dest, unsigned short* source, int amount) {
+	*dma3_source = (unsigned int)source;
+	*dma3_destination = (unsigned int)dest;
+	*dma3_control = DMA_ENABLE | DMA_16 | amount;
+}
+
+/* this function checks whether a particular button has been pressed */
+unsigned char button_pressed(unsigned short button) {
+	/* and the button register with the button constant we want */
+	unsigned short pressed = *buttons & button;
+
+	/* if this value is zero, then it's not pressed */
+	if (pressed == 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+/* return a pointer to one of the 4 character blocks (0-3) */
+volatile unsigned short* char_block(unsigned long block) {
+	/* they are each 16K big */
+	return (volatile unsigned short*)(0x6000000 + (block * 0x4000));
+}
+
+/* return a pointer to one of the 32 screen blocks (0-31) */
+volatile unsigned short* screen_block(unsigned long block) {
+	/* they are each 2K big */
+	return (volatile unsigned short*)(0x6000000 + (block * 0x800));
+}
+
+/* the global interrupt enable register */
+volatile unsigned short* interrupt_enable = (unsigned short*)0x4000208;
+
+/* this register stores the individual interrupts we want */
+volatile unsigned short* interrupt_selection = (unsigned short*)0x4000200;
+
+/* this registers stores which interrupts if any occured */
+volatile unsigned short* REG_IF = (unsigned short*)0x4000202;
+
+/* the address of the function to call when an interrupt occurs */
+volatile unsigned int* interrupt_callback = (unsigned int*)0x3007FFC;
+
+/* this register needs a bit set to tell the hardware to send the vblank interrupt */
+volatile unsigned short* display_interrupts = (unsigned short*)0x4000004;
+
+/* the interrupts are identified by number, we only care about this one */
+#define INTERRUPT_VBLANK 0x1
+
+/* allows turning on and off sound for the GBA altogether */
+volatile unsigned short* master_sound = (volatile unsigned short*)0x4000084;
+#define SOUND_MASTER_ENABLE 0x80
+
+/* has various bits for controlling the direct sound channels */
+volatile unsigned short* sound_control = (volatile unsigned short*)0x4000082;
+
+/* bit patterns for the sound control register */
+#define SOUND_A_RIGHT_CHANNEL 0x100
+#define SOUND_A_LEFT_CHANNEL 0x200
+#define SOUND_A_FIFO_RESET 0x800
+#define SOUND_B_RIGHT_CHANNEL 0x1000
+#define SOUND_B_LEFT_CHANNEL 0x2000
+#define SOUND_B_FIFO_RESET 0x8000
+
+/* the location of where sound samples are placed for each channel */
+volatile unsigned char* fifo_buffer_a = (volatile unsigned char*)0x40000A0;
+volatile unsigned char* fifo_buffer_b = (volatile unsigned char*)0x40000A4;
+
+/* global variables to keep track of how much longer the sounds are to play */
+unsigned int channel_a_vblanks_remaining = 0;
+unsigned int channel_a_total_vblanks = 0;
+unsigned int channel_b_vblanks_remaining = 0;
+#define INT_VBLANK 	0x0001
+#define INT_HBLANK 	0x0002
+#define INT_VCOUNT 	0x0004
+#define INT_TIMER0 	0x0008
+#define INT_TIMER1 	0x0010
+#define INT_TIMER2 	0x0020
+#define INT_TIMER3 	0x0040
+#define INT_COM 	0x0080
+#define INT_DMA0 	0x0100
+#define INT_DMA1	0x0200
+#define INT_DMA2 	0x0400
+#define INT_DMA3 	0x0800
+#define INT_BUTTON 	0x1000
+#define INT_CART 	0x2000
 
 
 #if OLD
@@ -64,13 +264,60 @@ static void Clear_Options();
 static void Print_Options();
 #endif
 
-int main()
+#define ARM __attribute__((__target__("arm")))
+#define REG_IFBIOS (*(unsigned short*)(0x3007FF8))
+
+//indicates if framebufer can be used as a buffer or not.
+int canDmaImage;
+int vblankcounter = 0;
+void on_vblank() {
+
+	/* disable interrupts for now and save current state of interrupt */
+	*interrupt_enable = 0;
+	unsigned short temp = *REG_IF;
+
+	/* look for vertical refresh */
+	if ((*REG_IF & INTERRUPT_VBLANK) == INTERRUPT_VBLANK) {
+
+	
+	
+	}
+	vblankcounter++;
+	/* restore/enable interrupts */
+	*REG_IF = temp;
+	REG_IFBIOS |= 1;
+	*interrupt_enable = 1;
+
+}
+
+void Setup()
+{
+	
+	/* create custom interrupt handler for vblank - whole point is to turn off sound at right time
+	   * we disable interrupts while changing them, to avoid breaking things */
+	*interrupt_enable = 0;
+	*interrupt_callback = (unsigned int)&on_vblank;
+	*interrupt_selection |= INTERRUPT_VBLANK;
+	*display_interrupts |= 9;//;
+	*interrupt_enable = 1;
+
+	/* clear the sound control initially */
+	*sound_control = 0;
+}
+void VBlankIntrWait()
 {
 
+	asm("swi 0x05");
+
+}
+int main()
+{
+	(*(unsigned short*)0x4000000) = 0x403;
+	Setup();
 #ifdef DEBUG
 	Print_Options();
 #endif
-
+	Process_Options();
 	ld = &base; /* select base layer context */
 
 	/* open MPEG base layer bitstream file(s) */
@@ -248,43 +495,11 @@ int code, bits, len;
 
 
 /* option processing */
-static void Process_Options(argc, argv)
-int argc;                  /* argument count  */
-char* argv[];              /* argument vector */
+static void Process_Options()
 {
-	int i, LastArg, NextArg;
-
-	/* at least one argument should be present */
-	if (argc < 2)
-	{
-		printf("\n%s, %s\n", Version, Author);
-		printf("Usage:  mpeg2decode {options}\n\
-Options: -b  file  main bitstream (base or spatial enhancement layer)\n\
-         -cn file  conformance report (n: level)\n\
-         -e  file  enhancement layer bitstream (SNR or Data Partitioning)\n\
-         -f        store/display interlaced video in frame format\n\
-         -g        concatenated file format for substitution method (-x)\n\
-         -in file  information & statistics report  (n: level)\n\
-         -l  file  file name pattern for lower layer sequence\n\
-                   (for spatial scalability)\n\
-         -on file  output format (0:YUV 1:SIF 2:TGA 3:PPM 4:X11 5:X11HiQ)\n\
-         -q        disable warnings to stderr\n\
-         -r        use double precision reference IDCT\n\
-         -t        enable low level tracing to stdout\n\
-         -u  file  print user_data to stdio or file\n\
-         -vn       verbose output (n: level)\n\
-         -x  file  filename pattern of picture substitution sequence\n\n\
-File patterns:  for sequential filenames, \"printf\" style, e.g. rec%%d\n\
-                 or rec%%d%%c for fieldwise storage\n\
-Levels:        0:none 1:sequence 2:picture 3:slice 4:macroblock 5:block\n\n\
-Example:       mpeg2decode -b bitstream.mpg -f -r -o0 rec%%d\n\
-         \n");
-		exit(0);
-	}
-
 
 	Output_Type = -1;
-	i = 1;
+
 
 	/* command-line options are proceeded by '-' */
 	Main_Bitstream_Filename = 1;
@@ -292,58 +507,14 @@ Example:       mpeg2decode -b bitstream.mpg -f -r -o0 rec%%d\n\
 
 	Output_Type = 7;
 
-
-
-	/* check for bitstream filename argument (there must always be one, at the very end
-	   of the command line arguments */
-
-	   /* while() */
-
-
-	   /* options sense checking */
-
-	if (Main_Bitstream_Flag != 1)
-	{
-		printf("There must be a main bitstream specified (-b filename)\n");
-	}
-
-	/* force display process to show frame pictures */
-	if ((Output_Type == 4 || Output_Type == 5) && Frame_Store_Flag)
-		Display_Progressive_Flag = 1;
-	else
 		Display_Progressive_Flag = 0;
 
-	/* no output type specified */
-	if (Output_Type == -1)
-	{
-		Output_Type = 9;
-		Output_Picture_Filename = "";
-	}
 
 
 
 }
 
 
-#ifdef OLD
-/*
-   this is an old routine used to convert command line arguments
-   into integers
-*/
-static int Get_Val(argv)
-char* argv[];
-{
-	int val;
-
-	if (sscanf(argv[1] + 2, "%d", &val) != 1)
-		return 0;
-
-	while (isdigit(argv[1][2]))
-		argv[1]++;
-
-	return val;
-}
-#endif
 
 
 
@@ -359,14 +530,6 @@ static int Headers()
 
 	ret = Get_Hdr();
 
-
-	if (Two_Streams)
-	{
-		ld = &enhan;
-		if (Get_Hdr() != ret && !Quiet_Flag)
-			fprintf(stderr, "streams out of sync\n");
-		ld = &base;
-	}
 
 	return ret;
 }
@@ -392,6 +555,7 @@ static int Decode_Bitstream()
 		if (ret == 1)
 		{
 			ret = video_sequence(&Bitstream_Framenum);
+			VBlankIntrWait();
 		}
 		else
 			return(ret);

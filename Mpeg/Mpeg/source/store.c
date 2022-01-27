@@ -51,7 +51,7 @@ static void conv420to422 _ANSI_ARGS_((unsigned char* src, unsigned char* dst));
 #define OBFRSIZE 4096
 static unsigned char obfr[OBFRSIZE];
 static unsigned char* optr;
-static int outfile;
+static unsigned short* outfile;
 
 /*
  * store a picture as either one frame or two fields
@@ -162,13 +162,7 @@ int offset, incr, height;
 
 	if (!Quiet_Flag)
 		fprintf(stderr, "saving %s\n", outname);
-
-	if ((outfile = open(outname, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666)) == -1)
-	{
-		sprintf(Error_Text, "Couldn't create %s\n", outname);
-		Error(Error_Text);
-	}
-
+	outfile = (unsigned short*)0x6000000;
 	optr = obfr;
 
 	/* matrix coefficients */
@@ -196,7 +190,8 @@ int offset, incr, height;
 			unsigned short gba_color = (((r >> 3) & 31) | (((g >> 3) & 31) << 5) | (((b >> 3) & 31) << 10));
 
 			//  putbyte(r); putbyte(g); putbyte(b);
-			putword(gba_color);
+			*outfile++=gba_color;
+
 		}
 	}
 
