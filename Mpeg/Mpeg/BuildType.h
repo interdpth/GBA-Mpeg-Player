@@ -1,1 +1,0 @@
-#define GBA  //uncomment to build for GBA

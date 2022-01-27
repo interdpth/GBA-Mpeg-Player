@@ -15,82 +15,76 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="display.c">
+    <ClCompile Include="source\Aliemovie.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getbits.c">
+    <ClCompile Include="source\gbamain.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getblk.c">
+    <ClCompile Include="source\gbaoverload.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gethdr.c">
+    <ClCompile Include="source\getbits.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getpic.c">
+    <ClCompile Include="source\getblk.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getvlc.c">
+    <ClCompile Include="source\gethdr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="idct.c">
+    <ClCompile Include="source\getpic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="idctref.c">
+    <ClCompile Include="source\getvlc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="motion.c">
+    <ClCompile Include="source\idct.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mpeg2dec.c">
+    <ClCompile Include="source\idctref.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="recon.c">
+    <ClCompile Include="source\motion.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="spatscal.c">
+    <ClCompile Include="source\recon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="store.c">
+    <ClCompile Include="source\spatscal.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="subspic.c">
+    <ClCompile Include="source\store.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systems.c">
+    <ClCompile Include="source\subspic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="verify.c">
+    <ClCompile Include="source\systems.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Aliemovie.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="gbamain.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="gbaoverload.c">
+    <ClCompile Include="source\verify.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="config.h">
+    <ClInclude Include="source\Aliemovie.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="getvlc.h">
+    <ClInclude Include="source\BuildType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="global.h">
+    <ClInclude Include="source\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mpeg2dec.h">
+    <ClInclude Include="source\getvlc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Aliemovie.h">
+    <ClInclude Include="source\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BuildType.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="source\mpeg2dec.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

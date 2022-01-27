@@ -27,7 +27,7 @@
  * design.
  *
  */
-#include "BuildType.h"
+#include "source\BuildType.h"
 
 #ifndef GBA
 #include <stdio.h>
@@ -36,8 +36,8 @@
 #include <fcntl.h>
 
 #define GLOBAL
-#include "config.h"
-#include "global.h"
+#include "source\config.h"
+#include "source\global.h"
 
 /* private prototypes */
 static int  video_sequence _ANSI_ARGS_((int *framenum));

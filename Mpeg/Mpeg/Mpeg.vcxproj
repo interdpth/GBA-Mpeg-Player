@@ -139,33 +139,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Aliemovie.c" />
-    <ClCompile Include="display.c" />
-    <ClCompile Include="gbamain.c" />
-    <ClCompile Include="gbaoverload.c" />
-    <ClCompile Include="getbits.c" />
-    <ClCompile Include="getblk.c" />
-    <ClCompile Include="gethdr.c" />
-    <ClCompile Include="getpic.c" />
-    <ClCompile Include="getvlc.c" />
-    <ClCompile Include="idct.c" />
-    <ClCompile Include="idctref.c" />
-    <ClCompile Include="motion.c" />
-    <ClCompile Include="mpeg2dec.c" />
-    <ClCompile Include="recon.c" />
-    <ClCompile Include="spatscal.c" />
-    <ClCompile Include="store.c" />
-    <ClCompile Include="subspic.c" />
-    <ClCompile Include="systems.c" />
-    <ClCompile Include="verify.c" />
+    <ClCompile Include="source\Aliemovie.c" />
+    <ClCompile Include="source\gbamain.c" />
+    <ClCompile Include="source\gbaoverload.c" />
+    <ClCompile Include="source\getbits.c" />
+    <ClCompile Include="source\getblk.c" />
+    <ClCompile Include="source\gethdr.c" />
+    <ClCompile Include="source\getpic.c" />
+    <ClCompile Include="source\getvlc.c" />
+    <ClCompile Include="source\idct.c" />
+    <ClCompile Include="source\idctref.c" />
+    <ClCompile Include="source\motion.c" />
+    <ClCompile Include="source\recon.c" />
+    <ClCompile Include="source\spatscal.c" />
+    <ClCompile Include="source\store.c" />
+    <ClCompile Include="source\subspic.c" />
+    <ClCompile Include="source\systems.c" />
+    <ClCompile Include="source\verify.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Aliemovie.h" />
-    <ClInclude Include="BuildType.h" />
-    <ClInclude Include="config.h" />
-    <ClInclude Include="getvlc.h" />
-    <ClInclude Include="global.h" />
-    <ClInclude Include="mpeg2dec.h" />
+    <ClInclude Include="source\Aliemovie.h" />
+    <ClInclude Include="source\BuildType.h" />
+    <ClInclude Include="source\config.h" />
+    <ClInclude Include="source\getvlc.h" />
+    <ClInclude Include="source\global.h" />
+    <ClInclude Include="source\mpeg2dec.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
