@@ -39,15 +39,15 @@
 #include "global.h"
 
 /* private prototypes*/
-static void Read_Frame _ANSI_ARGS_((char *filename, 
+void Read_Frame _ANSI_ARGS_((char *filename, 
   unsigned char *frame_buffer[], int framenum));
-static void Copy_Frame _ANSI_ARGS_((unsigned char *src, unsigned char *dst, 
+void Copy_Frame _ANSI_ARGS_((unsigned char *src, unsigned char *dst, 
   int width, int height, int parity, int incr));
-static int Read_Components _ANSI_ARGS_ ((char *filename, 
+int Read_Components _ANSI_ARGS_ ((char *filename, 
   unsigned char *frame[3], int framenum));
-static int Read_Component _ANSI_ARGS_ ((char *fname, unsigned char *frame, 
+int Read_Component _ANSI_ARGS_ ((char *fname, unsigned char *frame, 
   int width, int height));
-static int Extract_Components _ANSI_ARGS_ ((char *filename,
+int Extract_Components _ANSI_ARGS_ ((char *filename,
   unsigned char *frame[3], int framenum));
 
 
@@ -56,20 +56,20 @@ void Substitute_Frame_Buffer (bitstream_framenum, sequence_framenum)
 int bitstream_framenum;
 int sequence_framenum;
 {
-  /* static tracking variables */
-  static int previous_temporal_reference;
-  static int previous_bitstream_framenum;
-  static int previous_anchor_temporal_reference;
-  static int previous_anchor_bitstream_framenum;
-  static int previous_picture_coding_type;
-  static int bgate;
+  /* tracking variables */
+  int previous_temporal_reference=-1;
+  int previous_bitstream_framenum = -1;
+  int previous_anchor_temporal_reference = -1;
+  int previous_anchor_bitstream_framenum = -1;
+  int previous_picture_coding_type = -1;
+  int bgate = -1;
   
   /* local temporary variables */
-  int substitute_display_framenum;
+  int substitute_display_framenum = -1;
 
 
 #ifdef DEBUG
-  printf("SUB: seq fn(%d) bitfn(%d) tempref(%d) picstr(%d) type(%d)\n", 
+  customprint("SUB: seq fn(%d) bitfn(%d) tempref(%d) picstr(%d) type(%d)\n", 
     sequence_framenum, bitstream_framenum, temporal_reference, 
     picture_structure, picture_coding_type);
 #endif
@@ -121,7 +121,7 @@ int sequence_framenum;
 #ifdef DEBUG
     else if((picture_coding_type!=B_TYPE)||(picture_coding_type!=D_TYPE))
     {
-      printf("NO SUBS FOR THIS PICTURE\n");
+      customprint("NO SUBS FOR THIS PICTURE\n");
     }
 #endif
   }
@@ -155,7 +155,7 @@ int sequence_framenum;
 
 /* Note: fields are only read to serve as the same-frame reference for 
    a second field */
-static void Read_Frame(fname,frame,framenum)
+void Read_Frame(fname,frame,framenum)
 char *fname;
 unsigned char *frame[];
 int framenum;
@@ -165,7 +165,7 @@ int framenum;
   int field_mode;
 
   if(framenum<0)
-    printf("ERROR: framenum (%d) is less than zero\n", framenum);
+    customprint("ERROR: framenum (%d) is less than zero\n", framenum);
 
 
   if(Big_Picture_Flag)
@@ -175,7 +175,7 @@ int framenum;
 
   if(rerr!=0)
   {
-    printf("was unable to substitute frame\n");
+    customprint("was unable to substitute frame\n");
   }
 
   /* now copy to the appropriate buffer */
@@ -207,7 +207,7 @@ int framenum;
 
 #ifdef VERBOSE
   if(Verbose_Flag > NO_LAYER)
-    printf("substituted %s %d\n",
+    customprint("substituted %s %d\n",
       (field_mode ? (parity?"bottom field":"bottom field"):"frame"), framenum);
 #endif
 }
@@ -215,7 +215,7 @@ int framenum;
 
 
 
-static int Read_Components(filename, frame, framenum) 
+int Read_Components(filename, frame, framenum) 
 char *filename;
 unsigned char *frame[3];
 int framenum;
@@ -224,29 +224,30 @@ int framenum;
   char outname[FILENAME_LENGTH];
   char name[FILENAME_LENGTH];
 
-  sprintf(outname,filename,framenum);
+  scustomprint(outname,filename,framenum);
 
 
-  sprintf(name,"%s.Y",outname);
+  scustomprint(name,"%s.Y",outname);
   err += Read_Component(name, frame[0], Coded_Picture_Width, 
     Coded_Picture_Height);
 
-  sprintf(name,"%s.U",outname);
+  scustomprint(name,"%s.U",outname);
   err += Read_Component(name, frame[1], Chroma_Width, Chroma_Height);
 
-  sprintf(name,"%s.V",outname);
+  scustomprint(name,"%s.V",outname);
   err += Read_Component(name, frame[2], Chroma_Width, Chroma_Height);
 
   return(err);
 }
 
 
-static int Read_Component(Filename, Frame, Width, Height)
+int Read_Component(Filename, Frame, Width, Height)
 char *Filename;
 unsigned char *Frame;
 int Width;
 int Height;
 {
+    while (1);
   int Size;
   int Bytes_Read;
   int Infile;
@@ -254,12 +255,12 @@ int Height;
   Size = Width*Height;
 //
 //#ifdef DEBUG
-//  printf("SUBS: reading %s\n", filename);
+//  customprint("SUBS: reading %s\n", filename);
 //#endif
 //
 //  if(!(Infile=open(Filename,O_RDONLY|O_BINARY))<0)
 //  {
-//    printf("ERROR: unable to open reference filename (%s)\n", Filename);
+//    customprint("ERROR: unable to open reference filename (%s)\n", Filename);
 //	return(-1);
 //  }
 //
@@ -267,11 +268,12 @@ int Height;
 //  
 //  if(Bytes_Read!=Size)
 //  {
-//    printf("was able to read only %d bytes of %d of file %s\n",
+//    customprint("was able to read only %d bytes of %d of file %s\n",
 //      Bytes_Read, Size, Filename);
 //  }
 // 
 //  close(Infile); 
+  while (1);
   return(0);
 }
 
@@ -282,7 +284,7 @@ int Height;
 /* Note: "big" files were used in E-mail exchanges almost exclusively by the 
    MPEG Committee's syntax validation and conformance ad-hoc groups from 
    the year 1993 until 1995 */
-static int Extract_Components(filename, frame, framenum) 
+int Extract_Components(filename, frame, framenum) 
 char *filename;
 unsigned char *frame[3];
 int framenum;
@@ -297,7 +299,7 @@ int framenum;
 
   if (!(fd = fopen(filename,"rb")))
   {
-    sprintf(Error_Text,"Couldn't open %s\n",filename);
+    scustomprint(Error_Text,"Couldn't open %s\n",filename);
     return(-1);
   }
 
@@ -311,14 +313,14 @@ int framenum;
   else if(chroma_format==CHROMA420)
     size = ((size*3)>>1);
   else
-    printf("ERROR: chroma_format (%d) not recognized\n", chroma_format);
+    customprint("ERROR: chroma_format (%d) not recognized\n", chroma_format);
 
 
   /* compute distance into "big" file */
   offset = size*framenum;
 
 #ifdef DEBUG
-  printf("EXTRACTING: frame(%d) offset(%d), size (%d) from %s\n", 
+  customprint("EXTRACTING: frame(%d) offset(%d), size (%d) from %s\n", 
     framenum, offset, size, filename);
 #endif
 
@@ -352,7 +354,7 @@ int framenum;
 }
 
 
-static void Copy_Frame(src, dst, width, height, parity, field_mode)
+void Copy_Frame(src, dst, width, height, parity, field_mode)
 unsigned char *src;
 unsigned char *dst;
 int width;
@@ -367,7 +369,7 @@ int field_mode;    /* 0 = frame, 1 = field                      */
   s = d = 0;
 
 #ifdef DEBUG
-  printf("COPYING (w=%d, h=%d, parity=%d, field_mode=%d)\n",
+  customprint("COPYING (w=%d, h=%d, parity=%d, field_mode=%d)\n",
     width,height,parity,field_mode);
 #endif /* DEBUG */
 

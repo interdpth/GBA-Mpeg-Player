@@ -54,7 +54,7 @@ void Reference_IDCT _ANSI_ARGS_((short *block));
 /* private data */
 
 /* cosine transform matrix for 8x1 IDCT */
-static double c[8][8];
+double c[8][8];
 
 /* initialize DCT coefficient matrix */
 
@@ -102,7 +102,7 @@ short *block;
       for (k=0; k<8; k++)
         partial_product+= c[k][i]*tmp[8*k+j];
 
-      //v = (int) floor(partial_product+0.5);
+      v = 0;//(int) floor(partial_product+0.5);
       block[8*i+j] = (v<-256) ? -256 : ((v>255) ? 255 : v);
     }
 }

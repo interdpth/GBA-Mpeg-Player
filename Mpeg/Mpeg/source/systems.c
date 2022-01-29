@@ -28,10 +28,10 @@
  */
 
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
+
 
 #include "config.h"
 #include "global.h"
@@ -69,7 +69,7 @@ void Next_Packet()
         ld->Rdptr++;
         code=Get_Byte();  /* parse PES_header_data_length */
         ld->Rdptr+=code;    /* advance pointer by PES_header_data_length */
-        printf("MPEG-2 PES packet\n");
+        customprint("MPEG-2 PES packet\n");
         return;
       }
       else if(code==0xff)
@@ -83,7 +83,7 @@ void Next_Packet()
       {
         if(code>=0x80)
         {
-          fprintf(stderr,"Error in packet header\n");
+          fcustomprint(stderr,"Error in packet header\n");
           exit(1);
         }
         /* skip STD_buffer_scale */
@@ -95,7 +95,7 @@ void Next_Packet()
       {
         if(code>=0x40)
         {
-          fprintf(stderr,"Error in packet header\n");
+          fcustomprint(stderr,"Error in packet header\n");
           exit(1);
         }
         /* skip presentation and decoding time stamps */
@@ -108,7 +108,7 @@ void Next_Packet()
       }
       else if(code!=0x0f)
       {
-        fprintf(stderr,"Error in packet header\n");
+        fcustomprint(stderr,"Error in packet header\n");
         exit(1);
       }
       return;
@@ -134,7 +134,7 @@ void Next_Packet()
       }
       else
       {
-        fprintf(stderr,"Unexpected startcode %08x in system layer\n",code);
+        fcustomprint(stderr,"Unexpected startcode %08x in system layer\n",code);
         exit(1);
       }
       break;

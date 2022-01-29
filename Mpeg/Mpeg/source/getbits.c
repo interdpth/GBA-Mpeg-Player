@@ -89,7 +89,7 @@ void Fill_Buffer()
     while (Buffer_Level < 2048)
     {
       ld->Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE>>24;
-      ld->Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE>>16;
+      ld->Rdbfr[Buffer_Level++] = (SEQUENCE_END_CODE>>16) & 2048;
       ld->Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE>>8;
       ld->Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE&0xff;
     }

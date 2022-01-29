@@ -97,7 +97,7 @@ int dc_dct_pred[];
     else
     {
       if (!Quiet_Flag)
-        printf("invalid Huffman code in Decode_MPEG1_Intra_Block()\n");
+        customprint("invalid Huffman code in Decode_MPEG1_Intra_Block()\n");
       Fault_Flag = 1;
       return;
     }
@@ -132,7 +132,7 @@ int dc_dct_pred[];
     if (i>=64)
     {
       if (!Quiet_Flag)
-        fprintf(stderr,"DCT coeff index (i) out of bounds (intra)\n");
+        fcustomprint(stderr,"DCT coeff index (i) out of bounds (intra)\n");
       Fault_Flag = 1;
       return;
     }
@@ -193,7 +193,7 @@ int comp;
     else
     {
       if (!Quiet_Flag)
-        printf("invalid Huffman code in Decode_MPEG1_Non_Intra_Block()\n");
+        customprint("invalid Huffman code in Decode_MPEG1_Non_Intra_Block()\n");
       Fault_Flag = 1;
       return;
     }
@@ -228,7 +228,7 @@ int comp;
     if (i>=64)
     {
       if (!Quiet_Flag)
-        fprintf(stderr,"DCT coeff index (i) out of bounds (inter)\n");
+        fcustomprint(stderr,"DCT coeff index (i) out of bounds (inter)\n");
       Fault_Flag = 1;
       return;
     }
@@ -294,7 +294,7 @@ int dc_dct_pred[];
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("DCT(%d)i:",comp);
+    customprint("DCT(%d)i:",comp);
 #endif /* TRACE */
 
   /* decode AC coefficients */
@@ -330,7 +330,7 @@ int dc_dct_pred[];
     else
     {
       if (!Quiet_Flag)
-        printf("invalid Huffman code in Decode_MPEG2_Intra_Block()\n");
+        customprint("invalid Huffman code in Decode_MPEG2_Intra_Block()\n");
       Fault_Flag = 1;
       return;
     }
@@ -340,7 +340,7 @@ int dc_dct_pred[];
 #ifdef TRACE
     if (Trace_Flag)
     {
-      printf(" (");
+      customprint(" (");
       Print_Bits(code,16,tab->len);
     }
 #endif /* TRACE */
@@ -349,8 +349,8 @@ int dc_dct_pred[];
     {
 #ifdef TRACE
       if (Trace_Flag)
-        printf("): EOB\n");
-#endif /* TRACE */
+        customprint("): EOB\n");
+#endif
       return;
     }
 
@@ -378,7 +378,7 @@ int dc_dct_pred[];
       if ((val&2047)==0)
       {
         if (!Quiet_Flag)
-          printf("invalid escape in Decode_MPEG2_Intra_Block()\n");
+          customprint("invalid escape in Decode_MPEG2_Intra_Block()\n");
         Fault_Flag = 1;
         return;
       }
@@ -393,21 +393,21 @@ int dc_dct_pred[];
 
 #ifdef TRACE
       if (Trace_Flag)
-        printf("%d",sign);
+        customprint("%d",sign);
 #endif /* TRACE */
     }
 
     if (i>=64)
     {
       if (!Quiet_Flag)
-        fprintf(stderr,"DCT coeff index (i) out of bounds (intra2)\n");
+        fcustomprint(stderr,"DCT coeff index (i) out of bounds (intra2)\n");
       Fault_Flag = 1;
       return;
     }
 
 #ifdef TRACE
     if (Trace_Flag)
-      printf("): %d/%d",run,sign ? -val : val);
+      customprint("): %d/%d",run,sign ? -val : val);
 #endif /* TRACE */
 
     j = scan[ld1->alternate_scan][i];
@@ -451,7 +451,7 @@ int comp;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("DCT(%d)n:",comp);
+    customprint("DCT(%d)n:",comp);
 #endif /* TRACE */
 
   /* decode AC coefficients */
@@ -482,7 +482,7 @@ int comp;
     else
     {
       if (!Quiet_Flag)
-        printf("invalid Huffman code in Decode_MPEG2_Non_Intra_Block()\n");
+        customprint("invalid Huffman code in Decode_MPEG2_Non_Intra_Block()\n");
       Fault_Flag = 1;
       return;
     }
@@ -492,7 +492,7 @@ int comp;
 #ifdef TRACE
     if (Trace_Flag)
     {
-      printf(" (");
+      customprint(" (");
       Print_Bits(code,16,tab->len);
     }
 #endif /* TRACE */
@@ -501,7 +501,7 @@ int comp;
     {
 #ifdef TRACE
       if (Trace_Flag)
-        printf("): EOB\n");
+        customprint("): EOB\n");
 #endif /* TRACE */
       return;
     }
@@ -530,7 +530,7 @@ int comp;
       if ((val&2047)==0)
       {
         if (!Quiet_Flag)
-          printf("invalid escape in Decode_MPEG2_Intra_Block()\n");
+          customprint("invalid escape in Decode_MPEG2_Intra_Block()\n");
         Fault_Flag = 1;
         return;
       }
@@ -545,21 +545,21 @@ int comp;
 
 #ifdef TRACE
       if (Trace_Flag)
-        printf("%d",sign);
+        customprint("%d",sign);
 #endif /* TRACE */
     }
 
     if (i>=64)
     {
       if (!Quiet_Flag)
-        fprintf(stderr,"DCT coeff index (i) out of bounds (inter2)\n");
+        fcustomprint(stderr,"DCT coeff index (i) out of bounds (inter2)\n");
       Fault_Flag = 1;
       return;
     }
 
 #ifdef TRACE
     if (Trace_Flag)
-      printf("): %d/%d",run,sign?-val:val);
+      customprint("): %d/%d",run,sign?-val:val);
 #endif /* TRACE */
 
     j = scan[ld1->alternate_scan][i];

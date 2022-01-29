@@ -37,7 +37,7 @@
 #include "global.h"
 
 /* private prototypes */
-static void decode_motion_vector _ANSI_ARGS_((int *pred, int r_size, int motion_code,
+void decode_motion_vector _ANSI_ARGS_((int *pred, int r_size, int motion_code,
   int motion_residualesidual, int full_pel_vector));
 
 /* ISO/IEC 13818-2 sections 6.2.5.2, 6.3.17.2, and 7.6.3: Motion vectors */
@@ -56,10 +56,10 @@ int s, motion_vector_count, mv_format, h_r_size, v_r_size, dmv, mvscale;
 #ifdef TRACE
       if (Trace_Flag)
       {
-        printf("motion_vertical_field_select[][%d] (%d): %d\n",s,
+        customprint("motion_vertical_field_select[][%d] (%d): %d\n",s,
           motion_vertical_field_select[0][s],motion_vertical_field_select[0][s]);
       }
-#endif /* TRACE */
+#endif
     }
 
     motion_vector(PMV[0][s],dmvector,h_r_size,v_r_size,dmv,mvscale,0);
@@ -74,20 +74,20 @@ int s, motion_vector_count, mv_format, h_r_size, v_r_size, dmv, mvscale;
 #ifdef TRACE
     if (Trace_Flag)
     {
-      printf("motion_vertical_field_select[0][%d] (%d): %d\n",s,
+      customprint("motion_vertical_field_select[0][%d] (%d): %d\n",s,
         motion_vertical_field_select[0][s],motion_vertical_field_select[0][s]);
     }
-#endif /* TRACE */
+#endif
     motion_vector(PMV[0][s],dmvector,h_r_size,v_r_size,dmv,mvscale,0);
 
     motion_vertical_field_select[1][s] = Get_Bits(1);
 #ifdef TRACE
     if (Trace_Flag)
     {
-      printf("motion_vertical_field_select[1][%d] (%d): %d\n",s,
+      customprint("motion_vertical_field_select[1][%d] (%d): %d\n",s,
         motion_vertical_field_select[1][s],motion_vertical_field_select[1][s]);
     }
-#endif /* TRACE */
+#endif
     motion_vector(PMV[1][s],dmvector,h_r_size,v_r_size,dmv,mvscale,0);
   }
 }
@@ -117,12 +117,12 @@ int full_pel_vector; /* MPEG-1 only */
   {
     if (h_r_size!=0 && motion_code!=0)
     {
-      printf("motion_residual (");
+      customprint("motion_residual (");
       Print_Bits(motion_residual,h_r_size,h_r_size);
-      printf("): %d\n",motion_residual);
+      customprint("): %d\n",motion_residual);
     }
   }
-#endif /* TRACE */
+#endif
 
 
   decode_motion_vector(&PMV[0],h_r_size,motion_code,motion_residual,full_pel_vector);
@@ -140,12 +140,12 @@ int full_pel_vector; /* MPEG-1 only */
   {
     if (v_r_size!=0 && motion_code!=0)
     {
-      printf("motion_residual (");
+      customprint("motion_residual (");
       Print_Bits(motion_residual,v_r_size,v_r_size);
-      printf("): %d\n",motion_residual);
+      customprint("): %d\n",motion_residual);
     }
   }
-#endif /* TRACE */
+#endif
 
   if (mvscale)
     PMV[1] >>= 1; /* DIV 2 */
@@ -160,8 +160,8 @@ int full_pel_vector; /* MPEG-1 only */
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("PMV = %d,%d\n",PMV[0],PMV[1]);
-#endif /* TRACE */
+    customprint("PMV = %d,%d\n",PMV[0],PMV[1]);
+#endif
 }
 
 /* calculate motion vector component */
@@ -169,7 +169,7 @@ int full_pel_vector; /* MPEG-1 only */
 /* Note: the arithmetic here is more elegant than that which is shown 
    in 7.6.3.1.  The end results (PMV[][][]) should, however, be the same.  */
 
-static void decode_motion_vector(pred,r_size,motion_code,motion_residual,full_pel_vector)
+void decode_motion_vector(pred,r_size,motion_code,motion_residual,full_pel_vector)
 int *pred;
 int r_size, motion_code, motion_residual;
 int full_pel_vector; /* MPEG-1 (ISO/IEC 11172-1) support */

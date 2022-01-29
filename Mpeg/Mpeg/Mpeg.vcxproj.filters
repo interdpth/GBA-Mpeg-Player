@@ -66,6 +66,9 @@
     <ClCompile Include="source\verify.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\globals.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Aliemovie.h">

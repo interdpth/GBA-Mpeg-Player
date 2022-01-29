@@ -32,7 +32,7 @@
 */
 
 
-static void Check_VBV_Delay _ANSI_ARGS_((int Bitstream_Framenum, int Sequence_Framenum));
+void Check_VBV_Delay _ANSI_ARGS_((int Bitstream_Framenum, int Sequence_Framenum));
 
 
 void Check_Headers(Bitstream_Framenum, Sequence_Framenum)
@@ -64,7 +64,7 @@ int Sequence_Framenum;
  * Also: no special provisions at the beginning or end of a sequence
  */
 
-static void Check_VBV_Delay(Bitstream_Framenum, Sequence_Framenum)
+void Check_VBV_Delay(Bitstream_Framenum, Sequence_Framenum)
 int Bitstream_Framenum;
 int Sequence_Framenum;
 {
@@ -77,14 +77,14 @@ int Sequence_Framenum;
   int d;
   int internal_vbv_delay;
   
-  static int previous_IorP_picture_structure;
-  static int previous_IorP_repeat_first_field;
-  static int previous_IorP_top_field_first;
-  static int previous_vbv_delay;
-  static int previous_bitstream_position;
+  int previous_IorP_picture_structure;
+  int previous_IorP_repeat_first_field;
+  int previous_IorP_top_field_first;
+  int previous_vbv_delay;
+  int previous_bitstream_position;
 
-  static double previous_Bn;
-  static double E;      /* maximum quantization error or mismatch */
+  double previous_Bn;
+  double E;      /* maximum quantization error or mismatch */
 
   
 
@@ -108,7 +108,7 @@ int Sequence_Framenum;
     E = (400.0/frame_rate) + 400;
 
 #ifdef DEBUG
-    printf("vbv_buffer_size (B) = %.0f, Bn=%f, E=%f, \nbitrate=%f, vbv_delay=%d frame_rate=%f\n", 
+    customprint("vbv_buffer_size (B) = %.0f, Bn=%f, E=%f, \nbitrate=%f, vbv_delay=%d frame_rate=%f\n", 
       B, Bn, E, bit_rate, vbv_delay, frame_rate); 
 #endif
 
@@ -243,16 +243,16 @@ int Sequence_Framenum;
     internal_vbv_delay = (int) ceil((90000 * Bn / bit_rate));
 
 #ifdef DEBUG
-    printf("\nvbv_delay: internal=%d, bitstream=%d\n", internal_vbv_delay, vbv_delay);
+    customprint("\nvbv_delay: internal=%d, bitstream=%d\n", internal_vbv_delay, vbv_delay);
     
-    printf("Bn=%f, prevBn=%f, I=%f, R=%f, d=%d\n", Bn, previous_Bn, I, R, d);
-    printf("frame(%d), pictstruct(%d), picttype(%d)\n", Sequence_Framenum, 
+    customprint("Bn=%f, prevBn=%f, I=%f, R=%f, d=%d\n", Bn, previous_Bn, I, R, d);
+    customprint("frame(%d), pictstruct(%d), picttype(%d)\n", Sequence_Framenum, 
       picture_structure, picture_coding_type);
 
     /* report error */
     if(internal_vbv_delay != vbv_delay)
     {
-      printf("WARNING: internal_vbv_delay(%d) != vbv_delay(%d)\n",
+      customprint("WARNING: internal_vbv_delay(%d) != vbv_delay(%d)\n",
         internal_vbv_delay, vbv_delay);
     }
 #endif

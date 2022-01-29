@@ -28,10 +28,10 @@
  *
  */
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
+
 
 
 #ifdef GBA
@@ -44,13 +44,13 @@
 #include "global.h"
 #include "Aliemovie.h"
  /* private prototypes */
-static int  video_sequence _ANSI_ARGS_((int* framenum));
-static int Decode_Bitstream _ANSI_ARGS_((void));
-static int  Headers _ANSI_ARGS_((void));
-static void Initialize_Sequence _ANSI_ARGS_((void));
-static void Initialize_Decoder _ANSI_ARGS_((void));
-static void Deinitialize_Sequence _ANSI_ARGS_((void));
-static void Process_Options();
+int  video_sequence _ANSI_ARGS_((int* framenum));
+int Decode_Bitstream _ANSI_ARGS_((void));
+int  Headers _ANSI_ARGS_((void));
+void Initialize_Sequence _ANSI_ARGS_((void));
+void Initialize_Decoder _ANSI_ARGS_((void));
+void Deinitialize_Sequence _ANSI_ARGS_((void));
+void Process_Options();
 
 
 //gba specific
@@ -135,17 +135,6 @@ volatile unsigned int* dma3_source = (volatile unsigned int*)0x40000D4;
 volatile unsigned int* dma3_destination = (volatile unsigned int*)0x40000D8;
 volatile unsigned int* dma3_control = (volatile unsigned int*)0x40000DC;
 
-const uint RAWHEADER = 0x88FFFF00;
-const uint LZCOMPRESSEDHEADER = 0x88FFFF01;
-const uint INTERLACERLEHEADER = 0x88FFFF22;
-const uint INTERLACERLEHEADER2 = 0x88FFFF23;
-const uint DESCRIBEHEADER = 0x88FFFF03;
-const uint LUTHEADER = 0x88FFFF02;
-const uint DIFFHEADER = 0x88FFFF12;
-const uint QUADDIFFHEADER = 0x88FFFF13;
-const uint QUADDIFFHEADER2 = 0x88FFFF14;
-const uint RLEHEADER = 0x88FFFF15;
-const uint NINTYRLHEADERINTR = 0x88FFFF76;
 typedef struct
 {
 	unsigned long thesize;
@@ -254,17 +243,16 @@ unsigned int channel_b_vblanks_remaining = 0;
 
 
 #if OLD
-static int  Get_Val _ANSI_ARGS_((char* argv[]));
+int  Get_Val _ANSI_ARGS_((char* argv[]));
 #endif
 
 /* #define DEBUG */
 
-static void Clear_Options();
+void Clear_Options();
 #ifdef DEBUG
-static void Print_Options();
+void Print_Options();
 #endif
 
-#define ARM __attribute__((__target__("arm")))
 #define REG_IFBIOS (*(unsigned short*)(0x3007FF8))
 
 //indicates if framebufer can be used as a buffer or not.
@@ -307,13 +295,39 @@ void Setup()
 void VBlankIntrWait()
 {
 
-	asm("swi 0x05");
+	__asm ("swi 0x05");
 
 }
+
+struct layer_data base;
 int main()
 {
+
+	if (!buf1)
+	{
+		int size2 = Coded_Picture_Width
+			* Coded_Picture_Height;
+		if (!(buf1 = (unsigned char*)customalloc(size2))) {
+			Error("malloc failed");
+		}
+
+
+		if (!(buf2 = (unsigned char*)customalloc(size2))) {
+			Error("malloc failed");
+		}
+		
+	}
+
+	Clear_Options();
 	(*(unsigned short*)0x4000000) = 0x403;
 	Setup();
+	int debug = 0x12334566;
+	//for (int i = 0; i < (240 * 160)/2; i++)
+	//{
+	//	*((unsigned long*)0x6000000 + i) = i + 0x2AB;
+	//	
+	//}
+	//VBlankIntrWait();
 #ifdef DEBUG
 	Print_Options();
 #endif
@@ -323,7 +337,7 @@ int main()
 	/* open MPEG base layer bitstream file(s) */
 	/* NOTE: this is either a base layer stream or a spatial enhancement stream */
 
-	base.fileBuf = Aliemovie;
+	base.fileBuf = (unsigned char*)Aliemovie;
 
 	base.fileSize = Aliemovie_size;
 
@@ -331,8 +345,7 @@ int main()
 
 	if (Show_Bits(8) == 0x47)
 	{
-		sprintf(Error_Text, "Decoder currently does not parse transport streams\n");
-		Error(Error_Text);
+		scustomprint("", "Decoder currently does not parse transport streams\n");
 	}
 
 	next_start_code();
@@ -348,14 +361,13 @@ int main()
 		System_Stream_Flag = 1;
 		break;
 	default:
-		sprintf(Error_Text, "Unable to recognize stream type\n");
-		Error(Error_Text);
+		scustomprint("","Unable to recognize stream type\n");
 		break;
 	}
 
-	base.fileBuf = Aliemovie;//Reset
+	base.fileBuf = (unsigned char*)Aliemovie;//Reset
 	Initialize_Buffer();
-	base.fileBuf = Aliemovie;//Reset
+	base.fileBuf = (unsigned char*)Aliemovie;//Reset
 
 
 	Initialize_Buffer();
@@ -363,33 +375,31 @@ int main()
 
 	Initialize_Decoder();
 
-	int	ret = Decode_Bitstream();
+	Decode_Bitstream();
 
 
 	return 0;
 }
 
+
+extern const unsigned char rawClip[1024];
 /* IMPLEMENTAION specific rouintes */
-static void Initialize_Decoder()
+void Initialize_Decoder()
 {
 	int i;
 
-	/* Clip table */
-	if (!(Clip = (unsigned char*)malloc(1024)))
-		Error("Clip[] malloc failed\n");
-
+	Clip = rawClip;
+	
 	Clip += 384;
 
-	for (i = -384; i < 640; i++)
-		Clip[i] = (i < 0) ? 0 : ((i > 255) ? 255 : i);
 
 
      Initialize_Fast_IDCT();
 
 }
-static int Table_6_20[3] = { 6,8,12 };
+const int Table_6_20[3] = { 6,8,12 };
 /* mostly IMPLEMENTAION specific rouintes */
-static void Initialize_Sequence()
+void Initialize_Sequence()
 {
 	int cc, size;
 
@@ -435,26 +445,26 @@ static void Initialize_Sequence()
 		else
 			size = Chroma_Width * Chroma_Height;
 
-		if (!(backward_reference_frame[cc] = (unsigned char*)malloc(size)))
+		if (!(backward_reference_frame[cc] = (unsigned char*)customalloc(size)))
 			Error("backward_reference_frame[] malloc failed\n");
 
-		if (!(forward_reference_frame[cc] = (unsigned char*)malloc(size)))
+		if (!(forward_reference_frame[cc] = (unsigned char*)customalloc(size)))
 			Error("forward_reference_frame[] malloc failed\n");
 
-		if (!(auxframe[cc] = (unsigned char*)malloc(size)))
+		if (!(auxframe[cc] = (unsigned char*)customalloc(size)))
 			Error("auxframe[] malloc failed\n");
 
 		if (Ersatz_Flag)
-			if (!(substitute_frame[cc] = (unsigned char*)malloc(size)))
+			if (!(substitute_frame[cc] = (unsigned char*)customalloc(size)))
 				Error("substitute_frame[] malloc failed\n");
 
 
 		if (base.scalable_mode == SC_SPAT)
 		{
 			/* this assumes lower layer is 4:2:0 */
-			if (!(llframe0[cc] = (unsigned char*)malloc((lower_layer_prediction_horizontal_size * lower_layer_prediction_vertical_size) / (cc ? 4 : 1))))
+			if (!(llframe0[cc] = (unsigned char*)customalloc((lower_layer_prediction_horizontal_size * lower_layer_prediction_vertical_size) / (cc ? 4 : 1))))
 				Error("llframe0 malloc failed\n");
-			if (!(llframe1[cc] = (unsigned char*)malloc((lower_layer_prediction_horizontal_size * lower_layer_prediction_vertical_size) / (cc ? 4 : 1))))
+			if (!(llframe1[cc] = (unsigned char*)customalloc((lower_layer_prediction_horizontal_size * lower_layer_prediction_vertical_size) / (cc ? 4 : 1))))
 				Error("llframe1 malloc failed\n");
 		}
 	}
@@ -462,48 +472,37 @@ static void Initialize_Sequence()
 	/* SCALABILITY: Spatial */
 	if (base.scalable_mode == SC_SPAT)
 	{
-		if (!(lltmp = (short*)malloc(lower_layer_prediction_horizontal_size * ((lower_layer_prediction_vertical_size * vertical_subsampling_factor_n) / vertical_subsampling_factor_m) * sizeof(short))))
+		if (!(lltmp = (short*)customalloc(lower_layer_prediction_horizontal_size * ((lower_layer_prediction_vertical_size * vertical_subsampling_factor_n) / vertical_subsampling_factor_m) * sizeof(short))))
 			Error("lltmp malloc failed\n");
 	}
 
-#ifdef DISPLAY
-	if (Output_Type == T_X11)
-	{
-		Initialize_Display_Process("");
-		Initialize_Dither_Matrix();
-	}
-#endif /* DISPLAY */
 
 }
 
 void Error(text)
 char* text;
 {
-	fprintf(stderr, text);
-	exit(1);
+	customprint( text);
+	while (1);
 }
 
 /* Trace_Flag output */
 void Print_Bits(code, bits, len)
 int code, bits, len;
 {
-	int i;
-	for (i = 0; i < len; i++)
-		printf("%d", (code >> (bits - 1 - i)) & 1);
+	return;
 }
 
 
 
 /* option processing */
-static void Process_Options()
+void Process_Options()
 {
 
 	Output_Type = -1;
 
 
 	/* command-line options are proceeded by '-' */
-	Main_Bitstream_Filename = 1;
-
 
 	Output_Type = 7;
 
@@ -518,7 +517,7 @@ static void Process_Options()
 
 
 
-static int Headers()
+int Headers()
 {
 	int ret;
 
@@ -536,7 +535,7 @@ static int Headers()
 
 
 
-static int Decode_Bitstream()
+int Decode_Bitstream()
 {
 	int ret;
 	int Bitstream_Framenum;
@@ -555,7 +554,7 @@ static int Decode_Bitstream()
 		if (ret == 1)
 		{
 			ret = video_sequence(&Bitstream_Framenum);
-			VBlankIntrWait();
+		
 		}
 		else
 			return(ret);
@@ -564,7 +563,7 @@ static int Decode_Bitstream()
 }
 
 
-static void Deinitialize_Sequence()
+void Deinitialize_Sequence()
 {
 	int i;
 
@@ -587,14 +586,10 @@ static void Deinitialize_Sequence()
 	if (base.scalable_mode == SC_SPAT)
 		free(lltmp);
 
-#ifdef DISPLAY
-	if (Output_Type == T_X11)
-		Terminate_Display_Process();
-#endif
 }
 
 
-static int video_sequence(Bitstream_Framenumber)
+int video_sequence(Bitstream_Framenumber)
 int* Bitstream_Framenumber;
 {
 	int Bitstream_Framenum;
@@ -649,7 +644,7 @@ int* Bitstream_Framenumber;
 
 
 
-static void Clear_Options()
+void Clear_Options()
 {
 	Verbose_Flag = 0;
 	Output_Type = 0;
@@ -668,7 +663,6 @@ static void Clear_Options()
 	Enhancement_Layer_Bitstream_Filename = " ";
 	Big_Picture_Flag = 0;
 	Main_Bitstream_Flag = 0;
-	Main_Bitstream_Filename = " ";
 	Verify_Flag = 0;
 	Stats_Flag = 0;
 	User_Data_Flag = 0;

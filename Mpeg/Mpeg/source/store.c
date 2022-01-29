@@ -27,31 +27,32 @@
  *
  */
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
+
 #include <fcntl.h>
 
 #include "config.h"
 #include "global.h"
+unsigned char* buf1;
+unsigned char* buf2;
+// /* private prototypes */
+//void store_one _ANSI_ARGS_((char* outname, unsigned char* src[],
+//	int offset, int incr, int height));
 
- /* private prototypes */
-static void store_one _ANSI_ARGS_((char* outname, unsigned char* src[],
+ void store_bmp16 _ANSI_ARGS_((char* outname, unsigned char* src[],
 	int offset, int incr, int height));
 
-static void store_bmp16 _ANSI_ARGS_((char* outname, unsigned char* src[],
-	int offset, int incr, int height));
-
-static void putbyte _ANSI_ARGS_((int c));
-static void putword _ANSI_ARGS_((int w));
-static void conv422to444 _ANSI_ARGS_((unsigned char* src, unsigned char* dst));
-static void conv420to422 _ANSI_ARGS_((unsigned char* src, unsigned char* dst));
+ void putbyte _ANSI_ARGS_((int c));
+ void putword _ANSI_ARGS_((int w));
+ void conv422to444 _ANSI_ARGS_((unsigned char* src, unsigned char* dst));
+ void conv420to422 _ANSI_ARGS_((unsigned char* src, unsigned char* dst));
 
 #define OBFRSIZE 4096
-static unsigned char obfr[OBFRSIZE];
-static unsigned char* optr;
-static unsigned short* outfile;
+ unsigned char obfr[OBFRSIZE];
+ unsigned char* optr;
+ unsigned short* outfile;
 
 /*
  * store a picture as either one frame or two fields
@@ -65,17 +66,17 @@ int frame;
 	if (progressive_sequence || progressive_frame || Frame_Store_Flag)
 	{
 		/* progressive */
-		sprintf(outname, Output_Picture_Filename, frame, 'f');
-		store_one(outname, src, 0, Coded_Picture_Width, vertical_size);
+		scustomprint(outname, Output_Picture_Filename, frame, 'f');
+		store_bmp16(outname, src, 0, Coded_Picture_Width, vertical_size);
 	}
 	else
 	{
 		/* interlaced */
-		sprintf(outname, Output_Picture_Filename, frame, 'a');
-		store_one(outname, src, 0, Coded_Picture_Width << 1, vertical_size >> 1);
+		scustomprint(outname, Output_Picture_Filename, frame, 'a');
+		store_bmp16(outname, src, 0, Coded_Picture_Width << 1, vertical_size >> 1);
 
-		sprintf(outname, Output_Picture_Filename, frame, 'b');
-		store_one(outname, src,
+		scustomprint(outname, Output_Picture_Filename, frame, 'b');
+		store_bmp16(outname, src,
 			Coded_Picture_Width, Coded_Picture_Width << 1, vertical_size >> 1);
 	}
 }
@@ -83,85 +84,76 @@ int frame;
 /*
  * store one frame or one field
  */
-static void store_one(outname, src, offset, incr, height)
+//void store_one(outname, src, offset, incr, height)
+//char* outname;
+//unsigned char* src[];
+//int offset, incr, height;
+//{
+//	switch (Output_Type)
+//	{
+//
+//	case T_RAW16BMP:
+//		store_bmp16(outname, src, offset, incr, height);
+//		break;
+//#ifdef DISPLAY
+//	case T_X11:
+//		dither(src);
+//		break;
+//#endif
+//	default:
+//		break;
+//	}
+//}
+
+
+//we need 4 buffers....lol....
+
+unsigned char* dontuse1 = 0;
+unsigned char* dontuse2 = 0;
+
+
+void store_bmp16(outname, src, offset, incr, height)
 char* outname;
 unsigned char* src[];
+
 int offset, incr, height;
 {
-	switch (Output_Type)
-	{
+	int debug = 0;
+	//init if it's not.
 
-	case T_RAW16BMP:
-		store_bmp16(outname, src, offset, incr, height);
-		break;
-#ifdef DISPLAY
-	case T_X11:
-		dither(src);
-		break;
-#endif
-	default:
-		break;
-	}
-}
 
-static void store_bmp16(outname, src, offset, incr, height)
-char* outname;
-unsigned char* src[];
-int offset, incr, height;
-{
 	int i, j;
 	int y, u, v, r, g, b;
 	int crv, cbu, cgu, cgv;
 	unsigned char* py, * pu, * pv;
-	static unsigned char tga24[14] = { 0,0,2,0,0,0,0, 0,0,0,0,0,24,32 };
-	char header[FILENAME_LENGTH];
-	static unsigned char* u422, * v422, * u444, * v444;
+	
+
 
 	if (chroma_format == CHROMA444)
 	{
-		u444 = src[1];
-		v444 = src[2];
+		buf1 = src[1];
+		buf2 = src[2];
 	}
 	else
 	{
-		if (!u444)
-		{
-			if (chroma_format == CHROMA420)
-			{
-				if (!(u422 = (unsigned char*)malloc((Coded_Picture_Width >> 1)
-					* Coded_Picture_Height)))
-					Error("malloc failed");
-				if (!(v422 = (unsigned char*)malloc((Coded_Picture_Width >> 1)
-					* Coded_Picture_Height)))
-					Error("malloc failed");
-			}
-
-			if (!(u444 = (unsigned char*)malloc(Coded_Picture_Width
-				* Coded_Picture_Height)))
-				Error("malloc failed");
-
-			if (!(v444 = (unsigned char*)malloc(Coded_Picture_Width
-				* Coded_Picture_Height)))
-				Error("malloc failed");
-		}
+		
 
 		if (chroma_format == CHROMA420)
 		{
-			conv420to422(src[1], u422);
-			conv420to422(src[2], v422);
-			conv422to444(u422, u444);
-			conv422to444(v422, v444);
+			conv420to422(src[1], buf1);//420 -- > 422;
+			conv422to444(buf1, buf1);
+
+
+			conv420to422(src[2], buf2);			
+			conv422to444(buf2, buf2);
 		}
 		else
 		{
-			conv422to444(src[1], u444);
-			conv422to444(src[2], v444);
+			conv422to444(src[1], buf1);
+			conv422to444(src[2], buf2);
 		}
 	}
-	strcat(outname, ".bmp16");
 
-	if (!Quiet_Flag)
-		fprintf(stderr, "saving %s\n", outname);
 	outfile = (unsigned short*)0x6000000;
 	optr = obfr;
 
@@ -174,8 +166,8 @@ int offset, incr, height;
 	for (i = 0; i < height; i++)
 	{
 		py = src[0] + offset + incr * i;
-		pu = u444 + offset + incr * i;
-		pv = v444 + offset + incr * i;
+		pu = buf1 + offset + incr * i;
+		pv = buf2 + offset + incr * i;
 
 		for (j = 0; j < horizontal_size; j++)
 		{
@@ -187,37 +179,26 @@ int offset, incr, height;
 			b = Clip[(y + cbu * u + 32786) >> 16];
 			///When recoding this, somehow turn clip into gba stuff
 
-			unsigned short gba_color = (((r >> 3) & 31) | (((g >> 3) & 31) << 5) | (((b >> 3) & 31) << 10));
+			unsigned short gba_color = (unsigned short)(0x8000 | ((int)r / 8 << 10) | ((int)g / 8 << 5) | ((int)b / 8));//(((r >> 3) & 31) | (((g >> 3) & 31) << 5) | (((b >> 3) & 31) << 10));
 
 			//  putbyte(r); putbyte(g); putbyte(b);
-			*outfile++=gba_color;
+			*outfile++=(gba_color);
 
 		}
 	}
 
-}
+	//Since we're done in the buffers, just clear them.
 
-
-static void putbyte(c)
-int c;
-{
-	*optr++ = c;
-
-	if (optr == obfr + OBFRSIZE)
+	for (int i = 0; i < (240 * 160)/4; i++)
 	{
-		write(outfile, obfr, OBFRSIZE);
-		optr = obfr;
+		*(unsigned long*)buf1[i] = 0;
+		*(unsigned long*)buf2[i] = 0;
 	}
 }
 
-static void putword(w)
-int w;
-{
-	putbyte(w); putbyte(w >> 8);
-}
 
 /* horizontal 1:2 interpolation filter */
-static void conv422to444(src, dst)
+ void conv422to444(src, dst)
 unsigned char* src, * dst;
 {
 	int i, i2, w, j, im3, im2, im1, ip1, ip2, ip3;
@@ -286,8 +267,10 @@ unsigned char* src, * dst;
 	}
 }
 
+
+//really though we ust need to merg the 420 to 422 to rgb together. 
 /* vertical 1:2 interpolation filter */
-static void conv420to422(src, dst)
+void conv420to422(src, dst)
 unsigned char* src, * dst;
 {
 	int w, h, i, j, j2;

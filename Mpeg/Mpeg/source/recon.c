@@ -37,12 +37,12 @@
 #include "global.h"
 
 /* private prototypes */
-static void form_prediction _ANSI_ARGS_((unsigned char *src[], int sfield,
+void form_prediction _ANSI_ARGS_((unsigned char *src[], int sfield,
   unsigned char *dst[], int dfield,
   int lx, int lx2, int w, int h, int x, int y, int dx, int dy,
   int average_flag));
 
-static void form_component_prediction _ANSI_ARGS_((unsigned char *src, unsigned char *dst,
+void form_component_prediction _ANSI_ARGS_((unsigned char *src, unsigned char *dst,
   int lx, int lx2, int w, int h, int x, int y, int dx, int dy, int average_flag));
 
 void form_predictions(bx,by,macroblock_type,motion_type,PMV,motion_vertical_field_select,dmvector,stwtype)
@@ -127,7 +127,7 @@ int stwtype;
       }
       else
         /* invalid motion_type */
-        printf("invalid motion_type\n");
+        customprint("invalid motion_type\n");
     }
     else /* TOP_FIELD or BOTTOM_FIELD */
     {
@@ -192,7 +192,7 @@ int stwtype;
       }
       else
         /* invalid motion_type */
-        printf("invalid motion_type\n");
+        customprint("invalid motion_type\n");
     }
     stwtop = stwbot = 1;
   }
@@ -251,12 +251,12 @@ int stwtype;
       }
       else
         /* invalid motion_type */
-        printf("invalid motion_type\n");
+        customprint("invalid motion_type\n");
     }
   }
 }
 
-static void form_prediction(src,sfield,dst,dfield,lx,lx2,w,h,x,y,dx,dy,average_flag)
+void form_prediction(src,sfield,dst,dfield,lx,lx2,w,h,x,y,dx,dy,average_flag)
 unsigned char *src[]; /* prediction source buffer */
 int sfield;           /* prediction source field number (0 or 1) */
 unsigned char *dst[]; /* prediction destination buffer */
@@ -314,7 +314,7 @@ int average_flag;     /* add prediction error to prediction ? */
  *  was chosen for its elegance.
 */
 
-static void form_component_prediction(src,dst,lx,lx2,w,h,x,y,dx,dy,average_flag)
+void form_component_prediction(src,dst,lx,lx2,w,h,x,y,dx,dy,average_flag)
 unsigned char *src;
 unsigned char *dst;
 int lx;          /* raster line increment */ 

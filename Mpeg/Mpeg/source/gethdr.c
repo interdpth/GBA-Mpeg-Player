@@ -28,45 +28,45 @@
  */
 
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
+
 
 #include "config.h"
 #include "global.h"
 
 
 /* private prototypes */
-static void sequence_header _ANSI_ARGS_((void));
-static void group_of_pictures_header _ANSI_ARGS_((void));
-static void picture_header _ANSI_ARGS_((void));
-static void extension_and_user_data _ANSI_ARGS_((void));
-static void sequence_extension _ANSI_ARGS_((void));
-static void sequence_display_extension _ANSI_ARGS_((void));
-static void quant_matrix_extension _ANSI_ARGS_((void));
-static void sequence_scalable_extension _ANSI_ARGS_((void));
-static void picture_display_extension _ANSI_ARGS_((void));
-static void picture_coding_extension _ANSI_ARGS_((void));
-static void picture_spatial_scalable_extension _ANSI_ARGS_((void));
-static void picture_temporal_scalable_extension _ANSI_ARGS_((void));
-static int  extra_bit_information _ANSI_ARGS_((void));
-static void copyright_extension _ANSI_ARGS_((void));
-static void user_data _ANSI_ARGS_((void));
-static void user_data _ANSI_ARGS_((void));
+void sequence_header _ANSI_ARGS_((void));
+void group_of_pictures_header _ANSI_ARGS_((void));
+void picture_header _ANSI_ARGS_((void));
+void extension_and_user_data _ANSI_ARGS_((void));
+void sequence_extension _ANSI_ARGS_((void));
+void sequence_display_extension _ANSI_ARGS_((void));
+void quant_matrix_extension _ANSI_ARGS_((void));
+void sequence_scalable_extension _ANSI_ARGS_((void));
+void picture_display_extension _ANSI_ARGS_((void));
+void picture_coding_extension _ANSI_ARGS_((void));
+void picture_spatial_scalable_extension _ANSI_ARGS_((void));
+void picture_temporal_scalable_extension _ANSI_ARGS_((void));
+int  extra_bit_information _ANSI_ARGS_((void));
+void copyright_extension _ANSI_ARGS_((void));
+void user_data _ANSI_ARGS_((void));
+void user_data _ANSI_ARGS_((void));
 
 
 
 
 /* introduced in September 1995 to assist spatial scalable decoding */
-static void Update_Temporal_Reference_Tacking_Data _ANSI_ARGS_((void));
+void Update_Temporal_Reference_Tacking_Data _ANSI_ARGS_((void));
 /* private variables */
-static int Temporal_Reference_Base = 0;
-static int True_Framenum_max  = -1;
-static int Temporal_Reference_GOP_Reset = 0;
+int Temporal_Reference_Base = 0;
+int True_Framenum_max  = -1;
+int Temporal_Reference_GOP_Reset = 0;
 
 #define RESERVED    -1 
-static double frame_rate_Table[16] =
+double frame_rate_Table[16] =
 {
   0.0,
   ((23.0*1000.0)/1001.0),
@@ -119,7 +119,7 @@ int Get_Hdr()
       break;
     default:
       if (!Quiet_Flag)
-        fprintf(stderr,"Unexpected next_start_code %08x (ignored)\n",code);
+        fcustomprint(stderr,"Unexpected next_start_code %08x (ignored)\n",code);
       break;
     }
   }
@@ -139,7 +139,7 @@ void next_start_code()
 
 /* decode sequence header */
 
-static void sequence_header()
+void sequence_header()
 {
   int i;
   int pos;
@@ -189,18 +189,18 @@ static void sequence_header()
 #ifdef VERBOSE
   if (Verbose_Flag > NO_LAYER)
   {
-    printf("sequence header (byte %d)\n",(pos>>3)-4);
+    customprint("sequence header (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag > SEQUENCE_LAYER)
     {
-      printf("  horizontal_size=%d\n",horizontal_size);
-      printf("  vertical_size=%d\n",vertical_size);
-      printf("  aspect_ratio_information=%d\n",aspect_ratio_information);
-      printf("  frame_rate_code=%d",frame_rate_code);
-      printf("  bit_rate_value=%d\n",bit_rate_value);
-      printf("  vbv_buffer_size=%d\n",vbv_buffer_size);
-      printf("  constrained_parameters_flag=%d\n",constrained_parameters_flag);
-      printf("  load_intra_quantizer_matrix=%d\n",ld->load_intra_quantizer_matrix);
-      printf("  load_non_intra_quantizer_matrix=%d\n",ld->load_non_intra_quantizer_matrix);
+      customprint("  horizontal_size=%d\n",horizontal_size);
+      customprint("  vertical_size=%d\n",vertical_size);
+      customprint("  aspect_ratio_information=%d\n",aspect_ratio_information);
+      customprint("  frame_rate_code=%d",frame_rate_code);
+      customprint("  bit_rate_value=%d\n",bit_rate_value);
+      customprint("  vbv_buffer_size=%d\n",vbv_buffer_size);
+      customprint("  constrained_parameters_flag=%d\n",constrained_parameters_flag);
+      customprint("  load_intra_quantizer_matrix=%d\n",ld->load_intra_quantizer_matrix);
+      customprint("  load_non_intra_quantizer_matrix=%d\n",ld->load_non_intra_quantizer_matrix);
     }
   }
 #endif /* VERBOSE */
@@ -216,7 +216,7 @@ static void sequence_header()
 
 /* decode group of pictures header */
 /* ISO/IEC 13818-2 section 6.2.2.6 */
-static void group_of_pictures_header()
+void group_of_pictures_header()
 {
   int pos;
 
@@ -238,13 +238,13 @@ static void group_of_pictures_header()
 #ifdef VERBOSE
   if (Verbose_Flag > NO_LAYER)
   {
-    printf("group of pictures (byte %d)\n",(pos>>3)-4);
+    customprint("group of pictures (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag > SEQUENCE_LAYER)
     {
-      printf("  drop_flag=%d\n",drop_flag);
-      printf("  timecode %d:%02d:%02d:%02d\n",hour,minute,sec,frame);
-      printf("  closed_gop=%d\n",closed_gop);
-      printf("  broken_link=%d\n",broken_link);
+      customprint("  drop_flag=%d\n",drop_flag);
+      customprint("  timecode %d:%02d:%02d:%02d\n",hour,minute,sec,frame);
+      customprint("  closed_gop=%d\n",closed_gop);
+      customprint("  broken_link=%d\n",broken_link);
     }
   }
 #endif /* VERBOSE */
@@ -261,7 +261,7 @@ static void group_of_pictures_header()
 /* decode picture header */
 
 /* ISO/IEC 13818-2 section 6.2.3 */
-static void picture_header()
+void picture_header()
 {
   int pos;
   int Extra_Information_Byte_Count;
@@ -288,21 +288,21 @@ static void picture_header()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("picture header (byte %d)\n",(pos>>3)-4);
+    customprint("picture header (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  temporal_reference=%d\n",temporal_reference);
-      printf("  picture_coding_type=%d\n",picture_coding_type);
-      printf("  vbv_delay=%d\n",vbv_delay);
+      customprint("  temporal_reference=%d\n",temporal_reference);
+      customprint("  picture_coding_type=%d\n",picture_coding_type);
+      customprint("  vbv_delay=%d\n",vbv_delay);
       if (picture_coding_type==P_TYPE || picture_coding_type==B_TYPE)
       {
-        printf("  full_pel_forward_vector=%d\n",full_pel_forward_vector);
-        printf("  forward_f_code =%d\n",forward_f_code);
+        customprint("  full_pel_forward_vector=%d\n",full_pel_forward_vector);
+        customprint("  forward_f_code =%d\n",forward_f_code);
       }
       if (picture_coding_type==B_TYPE)
       {
-        printf("  full_pel_backward_vector=%d\n",full_pel_backward_vector);
-        printf("  backward_f_code =%d\n",backward_f_code);
+        customprint("  full_pel_backward_vector=%d\n",full_pel_backward_vector);
+        customprint("  backward_f_code =%d\n",backward_f_code);
       }
     }
   }
@@ -362,21 +362,21 @@ int slice_header()
 #ifdef VERBOSE
   if (Verbose_Flag>PICTURE_LAYER)
   {
-    printf("slice header (byte %d)\n",(pos>>3)-4);
+    customprint("slice header (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SLICE_LAYER)
     {
       if (ld->MPEG2_Flag && vertical_size>2800)
-        printf("  slice_vertical_position_extension=%d\n",slice_vertical_position_extension);
+        customprint("  slice_vertical_position_extension=%d\n",slice_vertical_position_extension);
   
       if (ld->scalable_mode==SC_DP)
-        printf("  priority_breakpoint=%d\n",ld->priority_breakpoint);
+        customprint("  priority_breakpoint=%d\n",ld->priority_breakpoint);
 
-      printf("  quantizer_scale_code=%d\n",quantizer_scale_code);
+      customprint("  quantizer_scale_code=%d\n",quantizer_scale_code);
 
-      printf("  slice_picture_id_enable = %d\n", slice_picture_id_enable);
+      customprint("  slice_picture_id_enable = %d\n", slice_picture_id_enable);
 
       if(slice_picture_id_enable)
-        printf("  slice_picture_id = %d\n", slice_picture_id);
+        customprint("  slice_picture_id = %d\n", slice_picture_id);
 
     }
   }
@@ -393,7 +393,7 @@ int slice_header()
 
 /* decode extension and user data */
 /* ISO/IEC 13818-2 section 6.2.2.2 */
-static void extension_and_user_data()
+void extension_and_user_data()
 {
   int code,ext_ID;
 
@@ -435,7 +435,7 @@ static void extension_and_user_data()
         copyright_extension();
         break;
      default:
-        fprintf(stderr,"reserved extension start code ID %d\n",ext_ID);
+        fcustomprint(stderr,"reserved extension start code ID %d\n",ext_ID);
         break;
       }
       next_start_code();
@@ -444,7 +444,7 @@ static void extension_and_user_data()
     {
 #ifdef VERBOSE
       if (Verbose_Flag>NO_LAYER)
-        printf("user data\n");
+        customprint("user data\n");
 #endif /* VERBOSE */
       Flush_Buffer32();
       user_data();
@@ -456,7 +456,7 @@ static void extension_and_user_data()
 /* decode sequence extension */
 
 /* ISO/IEC 13818-2 section 6.2.2.3 */
-static void sequence_extension()
+void sequence_extension()
 {
   int horizontal_size_extension;
   int vertical_size_extension;
@@ -524,26 +524,26 @@ static void sequence_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("sequence extension (byte %d)\n",(pos>>3)-4);
+    customprint("sequence extension (byte %d)\n",(pos>>3)-4);
 
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  profile_and_level_indication=%d\n",profile_and_level_indication);
+      customprint("  profile_and_level_indication=%d\n",profile_and_level_indication);
 
       if (profile_and_level_indication<128)
       {
-        printf("    profile=%d, level=%d\n",profile,level);
+        customprint("    profile=%d, level=%d\n",profile,level);
       }
 
-      printf("  progressive_sequence=%d\n",progressive_sequence);
-      printf("  chroma_format=%d\n",chroma_format);
-      printf("  horizontal_size_extension=%d\n",horizontal_size_extension);
-      printf("  vertical_size_extension=%d\n",vertical_size_extension);
-      printf("  bit_rate_extension=%d\n",bit_rate_extension);
-      printf("  vbv_buffer_size_extension=%d\n",vbv_buffer_size_extension);
-      printf("  low_delay=%d\n",low_delay);
-      printf("  frame_rate_extension_n=%d\n",frame_rate_extension_n);
-      printf("  frame_rate_extension_d=%d\n",frame_rate_extension_d);
+      customprint("  progressive_sequence=%d\n",progressive_sequence);
+      customprint("  chroma_format=%d\n",chroma_format);
+      customprint("  horizontal_size_extension=%d\n",horizontal_size_extension);
+      customprint("  vertical_size_extension=%d\n",vertical_size_extension);
+      customprint("  bit_rate_extension=%d\n",bit_rate_extension);
+      customprint("  vbv_buffer_size_extension=%d\n",vbv_buffer_size_extension);
+      customprint("  low_delay=%d\n",low_delay);
+      customprint("  frame_rate_extension_n=%d\n",frame_rate_extension_n);
+      customprint("  frame_rate_extension_d=%d\n",frame_rate_extension_d);
     }
   }
 #endif /* VERBOSE */
@@ -558,7 +558,7 @@ static void sequence_extension()
 
 /* decode sequence display extension */
 
-static void sequence_display_extension()
+void sequence_display_extension()
 {
   int pos;
 
@@ -580,21 +580,21 @@ static void sequence_display_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("sequence display extension (byte %d)\n",(pos>>3)-4);
+    customprint("sequence display extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
 
-      printf("  video_format=%d\n",video_format);
-      printf("  color_description=%d\n",color_description);
+      customprint("  video_format=%d\n",video_format);
+      customprint("  color_description=%d\n",color_description);
 
       if (color_description)
       {
-        printf("    color_primaries=%d\n",color_primaries);
-        printf("    transfer_characteristics=%d\n",transfer_characteristics);
-        printf("    matrix_coefficients=%d\n",matrix_coefficients);
+        customprint("    color_primaries=%d\n",color_primaries);
+        customprint("    transfer_characteristics=%d\n",transfer_characteristics);
+        customprint("    matrix_coefficients=%d\n",matrix_coefficients);
       }
-      printf("  display_horizontal_size=%d\n",display_horizontal_size);
-      printf("  display_vertical_size=%d\n",display_vertical_size);
+      customprint("  display_horizontal_size=%d\n",display_horizontal_size);
+      customprint("  display_vertical_size=%d\n",display_vertical_size);
     }
   }
 #endif /* VERBOSE */
@@ -608,7 +608,7 @@ static void sequence_display_extension()
 
 /* decode quant matrix entension */
 /* ISO/IEC 13818-2 section 6.2.3.2 */
-static void quant_matrix_extension()
+void quant_matrix_extension()
 {
   int i;
   int pos;
@@ -650,14 +650,14 @@ static void quant_matrix_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("quant matrix extension (byte %d)\n",(pos>>3)-4);
-    printf("  load_intra_quantizer_matrix=%d\n",
+    customprint("quant matrix extension (byte %d)\n",(pos>>3)-4);
+    customprint("  load_intra_quantizer_matrix=%d\n",
       ld->load_intra_quantizer_matrix);
-    printf("  load_non_intra_quantizer_matrix=%d\n",
+    customprint("  load_non_intra_quantizer_matrix=%d\n",
       ld->load_non_intra_quantizer_matrix);
-    printf("  load_chroma_intra_quantizer_matrix=%d\n",
+    customprint("  load_chroma_intra_quantizer_matrix=%d\n",
       ld->load_chroma_intra_quantizer_matrix);
-    printf("  load_chroma_non_intra_quantizer_matrix=%d\n",
+    customprint("  load_chroma_non_intra_quantizer_matrix=%d\n",
       ld->load_chroma_non_intra_quantizer_matrix);
   }
 #endif /* VERBOSE */
@@ -671,7 +671,7 @@ static void quant_matrix_extension()
 
 /* decode sequence scalable extension */
 /* ISO/IEC 13818-2   section 6.2.2.5 */
-static void sequence_scalable_extension()
+void sequence_scalable_extension()
 {
   int pos;
 
@@ -700,24 +700,24 @@ static void sequence_scalable_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("sequence scalable extension (byte %d)\n",(pos>>3)-4);
+    customprint("sequence scalable extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  scalable_mode=%d\n",ld->scalable_mode-1);
-      printf("  layer_id=%d\n",layer_id);
+      customprint("  scalable_mode=%d\n",ld->scalable_mode-1);
+      customprint("  layer_id=%d\n",layer_id);
       if (ld->scalable_mode==SC_SPAT)
       {
-        printf("    lower_layer_prediction_horiontal_size=%d\n",
+        customprint("    lower_layer_prediction_horiontal_size=%d\n",
           lower_layer_prediction_horizontal_size);
-        printf("    lower_layer_prediction_vertical_size=%d\n",
+        customprint("    lower_layer_prediction_vertical_size=%d\n",
           lower_layer_prediction_vertical_size);
-        printf("    horizontal_subsampling_factor_m=%d\n",
+        customprint("    horizontal_subsampling_factor_m=%d\n",
           horizontal_subsampling_factor_m);
-        printf("    horizontal_subsampling_factor_n=%d\n",
+        customprint("    horizontal_subsampling_factor_n=%d\n",
           horizontal_subsampling_factor_n);
-        printf("    vertical_subsampling_factor_m=%d\n",
+        customprint("    vertical_subsampling_factor_m=%d\n",
           vertical_subsampling_factor_m);
-        printf("    vertical_subsampling_factor_n=%d\n",
+        customprint("    vertical_subsampling_factor_n=%d\n",
           vertical_subsampling_factor_n);
       }
     }
@@ -733,7 +733,7 @@ static void sequence_scalable_extension()
 
 /* decode picture display extension */
 /* ISO/IEC 13818-2 section 6.2.3.3. */
-static void picture_display_extension()
+void picture_display_extension()
 {
   int i;
   int number_of_frame_center_offsets;
@@ -787,15 +787,15 @@ static void picture_display_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("picture display extension (byte %d)\n",(pos>>3)-4);
+    customprint("picture display extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
 
       for (i=0; i<number_of_frame_center_offsets; i++)
       {
-        printf("  frame_center_horizontal_offset[%d]=%d\n",i,
+        customprint("  frame_center_horizontal_offset[%d]=%d\n",i,
           frame_center_horizontal_offset[i]);
-        printf("  frame_center_vertical_offset[%d]=%d\n",i,
+        customprint("  frame_center_vertical_offset[%d]=%d\n",i,
           frame_center_vertical_offset[i]);
       }
     }
@@ -810,7 +810,7 @@ static void picture_display_extension()
 
 
 /* decode picture coding extension */
-static void picture_coding_extension()
+void picture_coding_extension()
 {
   int pos;
 
@@ -846,33 +846,33 @@ static void picture_coding_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("picture coding extension (byte %d)\n",(pos>>3)-4);
+    customprint("picture coding extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  forward horizontal f_code=%d\n", f_code[0][0]);
-      printf("  forward vertical f_code=%d\n", f_code[0][1]);
-      printf("  backward horizontal f_code=%d\n", f_code[1][0]);
-      printf("  backward_vertical f_code=%d\n", f_code[1][1]);
-      printf("  intra_dc_precision=%d\n",intra_dc_precision);
-      printf("  picture_structure=%d\n",picture_structure);
-      printf("  top_field_first=%d\n",top_field_first);
-      printf("  frame_pred_frame_dct=%d\n",frame_pred_frame_dct);
-      printf("  concealment_motion_vectors=%d\n",concealment_motion_vectors);
-      printf("  q_scale_type=%d\n",ld->q_scale_type);
-      printf("  intra_vlc_format=%d\n",intra_vlc_format);
-      printf("  alternate_scan=%d\n",ld->alternate_scan);
-      printf("  repeat_first_field=%d\n",repeat_first_field);
-      printf("  chroma_420_type=%d\n",chroma_420_type);
-      printf("  progressive_frame=%d\n",progressive_frame);
-      printf("  composite_display_flag=%d\n",composite_display_flag);
+      customprint("  forward horizontal f_code=%d\n", f_code[0][0]);
+      customprint("  forward vertical f_code=%d\n", f_code[0][1]);
+      customprint("  backward horizontal f_code=%d\n", f_code[1][0]);
+      customprint("  backward_vertical f_code=%d\n", f_code[1][1]);
+      customprint("  intra_dc_precision=%d\n",intra_dc_precision);
+      customprint("  picture_structure=%d\n",picture_structure);
+      customprint("  top_field_first=%d\n",top_field_first);
+      customprint("  frame_pred_frame_dct=%d\n",frame_pred_frame_dct);
+      customprint("  concealment_motion_vectors=%d\n",concealment_motion_vectors);
+      customprint("  q_scale_type=%d\n",ld->q_scale_type);
+      customprint("  intra_vlc_format=%d\n",intra_vlc_format);
+      customprint("  alternate_scan=%d\n",ld->alternate_scan);
+      customprint("  repeat_first_field=%d\n",repeat_first_field);
+      customprint("  chroma_420_type=%d\n",chroma_420_type);
+      customprint("  progressive_frame=%d\n",progressive_frame);
+      customprint("  composite_display_flag=%d\n",composite_display_flag);
 
       if (composite_display_flag)
       {
-        printf("    v_axis=%d\n",v_axis);
-        printf("    field_sequence=%d\n",field_sequence);
-        printf("    sub_carrier=%d\n",sub_carrier);
-        printf("    burst_amplitude=%d\n",burst_amplitude);
-        printf("    sub_carrier_phase=%d\n",sub_carrier_phase);
+        customprint("    v_axis=%d\n",v_axis);
+        customprint("    field_sequence=%d\n",field_sequence);
+        customprint("    sub_carrier=%d\n",sub_carrier);
+        customprint("    burst_amplitude=%d\n",burst_amplitude);
+        customprint("    sub_carrier_phase=%d\n",sub_carrier_phase);
       }
     }
   }
@@ -886,7 +886,7 @@ static void picture_coding_extension()
 
 /* decode picture spatial scalable extension */
 /* ISO/IEC 13818-2 section 6.2.3.5. */
-static void picture_spatial_scalable_extension()
+void picture_spatial_scalable_extension()
 {
   int pos;
 
@@ -910,16 +910,16 @@ static void picture_spatial_scalable_extension()
 #ifdef VERBOSE
   if (Verbose_Flag>NO_LAYER)
   {
-    printf("picture spatial scalable extension (byte %d)\n",(pos>>3)-4);
+    customprint("picture spatial scalable extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  lower_layer_temporal_reference=%d\n",lower_layer_temporal_reference);
-      printf("  lower_layer_horizontal_offset=%d\n",lower_layer_horizontal_offset);
-      printf("  lower_layer_vertical_offset=%d\n",lower_layer_vertical_offset);
-      printf("  spatial_temporal_weight_code_table_index=%d\n",
+      customprint("  lower_layer_temporal_reference=%d\n",lower_layer_temporal_reference);
+      customprint("  lower_layer_horizontal_offset=%d\n",lower_layer_horizontal_offset);
+      customprint("  lower_layer_vertical_offset=%d\n",lower_layer_vertical_offset);
+      customprint("  spatial_temporal_weight_code_table_index=%d\n",
         spatial_temporal_weight_code_table_index);
-      printf("  lower_layer_progressive_frame=%d\n",lower_layer_progressive_frame);
-      printf("  lower_layer_deinterlaced_field_select=%d\n",lower_layer_deinterlaced_field_select);
+      customprint("  lower_layer_progressive_frame=%d\n",lower_layer_progressive_frame);
+      customprint("  lower_layer_deinterlaced_field_select=%d\n",lower_layer_deinterlaced_field_select);
     }
   }
 #endif /* VERBOSE */
@@ -936,7 +936,7 @@ static void picture_spatial_scalable_extension()
  * not implemented
  */
 /* ISO/IEC 13818-2 section 6.2.3.4. */
-static void picture_temporal_scalable_extension()
+void picture_temporal_scalable_extension()
 {
   Error("temporal scalability not supported\n");
 
@@ -948,7 +948,7 @@ static void picture_temporal_scalable_extension()
 
 /* decode extra bit information */
 /* ISO/IEC 13818-2 section 6.2.3.4. */
-static int extra_bit_information()
+int extra_bit_information()
 {
   int Byte_Count = 0;
 
@@ -975,13 +975,13 @@ char *text;
 
 #ifdef VERIFY  
   if(!marker)
-    printf("ERROR: %s--marker_bit set to 0",text);
+    customprint("ERROR: %s--marker_bit set to 0",text);
 #endif
 }
 
 
 /* ISO/IEC 13818-2  sections 6.3.4.1 and 6.2.2.2.2 */
-static void user_data()
+void user_data()
 {
   /* skip ahead to the next start code */
   next_start_code();
@@ -994,7 +994,7 @@ static void user_data()
 /* (header added in November, 1994 to the IS document) */
 
 
-static void copyright_extension()
+void copyright_extension()
 {
   int pos;
   int reserved_data;
@@ -1018,19 +1018,19 @@ static void copyright_extension()
 
   if(Verbose_Flag>NO_LAYER)
   {
-    printf("copyright_extension (byte %d)\n",(pos>>3)-4);
+    customprint("copyright_extension (byte %d)\n",(pos>>3)-4);
     if (Verbose_Flag>SEQUENCE_LAYER)
     {
-      printf("  copyright_flag =%d\n",copyright_flag);
+      customprint("  copyright_flag =%d\n",copyright_flag);
         
-      printf("  copyright_identifier=%d\n",copyright_identifier);
+      customprint("  copyright_identifier=%d\n",copyright_identifier);
         
-      printf("  original_or_copy = %d (original=1, copy=0)\n",
+      customprint("  original_or_copy = %d (original=1, copy=0)\n",
         original_or_copy);
         
-      printf("  copyright_number_1=%d\n",copyright_number_1);
-      printf("  copyright_number_2=%d\n",copyright_number_2);
-      printf("  copyright_number_3=%d\n",copyright_number_3);
+      customprint("  copyright_number_1=%d\n",copyright_number_1);
+      customprint("  copyright_number_2=%d\n",copyright_number_2);
+      customprint("  copyright_number_3=%d\n",copyright_number_3);
     }
   }
 
@@ -1042,10 +1042,10 @@ static void copyright_extension()
 
 
 /* introduced in September 1995 to assist Spatial Scalability */
-static void Update_Temporal_Reference_Tacking_Data()
+void Update_Temporal_Reference_Tacking_Data()
 {
-  static int temporal_reference_wrap  = 0;
-  static int temporal_reference_old   = 0;
+  int temporal_reference_wrap  = 0;
+  int temporal_reference_old   = 0;
 
   if (ld == &base)			/* *CH* */
   {

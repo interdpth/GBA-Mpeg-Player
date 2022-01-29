@@ -147,6 +147,7 @@
     <ClCompile Include="source\gethdr.c" />
     <ClCompile Include="source\getpic.c" />
     <ClCompile Include="source\getvlc.c" />
+    <ClCompile Include="source\globals.c" />
     <ClCompile Include="source\idct.c" />
     <ClCompile Include="source\idctref.c" />
     <ClCompile Include="source\motion.c" />

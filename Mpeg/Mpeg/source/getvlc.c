@@ -28,10 +28,9 @@
  */
 
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
 
 #include "config.h"
 #include "global.h"
@@ -39,16 +38,16 @@
 
 /* private prototypes */
 /* generic picture macroblock type processing functions */
-static int Get_I_macroblock_type _ANSI_ARGS_((void));
-static int Get_P_macroblock_type _ANSI_ARGS_((void));
-static int Get_B_macroblock_type _ANSI_ARGS_((void));
-static int Get_D_macroblock_type _ANSI_ARGS_((void));
+int Get_I_macroblock_type _ANSI_ARGS_((void));
+int Get_P_macroblock_type _ANSI_ARGS_((void));
+int Get_B_macroblock_type _ANSI_ARGS_((void));
+int Get_D_macroblock_type _ANSI_ARGS_((void));
 
 /* spatial picture macroblock type processing functions */
-static int Get_I_Spatial_macroblock_type _ANSI_ARGS_((void));
-static int Get_P_Spatial_macroblock_type _ANSI_ARGS_((void));
-static int Get_B_Spatial_macroblock_type _ANSI_ARGS_((void));
-static int Get_SNR_macroblock_type _ANSI_ARGS_((void));
+int Get_I_Spatial_macroblock_type _ANSI_ARGS_((void));
+int Get_P_Spatial_macroblock_type _ANSI_ARGS_((void));
+int Get_B_Spatial_macroblock_type _ANSI_ARGS_((void));
+int Get_SNR_macroblock_type _ANSI_ARGS_((void));
 
 int Get_macroblock_type()
 {
@@ -73,7 +72,7 @@ int Get_macroblock_type()
       macroblock_type = Get_D_macroblock_type();
       break;
     default:
-      printf("Get_macroblock_type(): unrecognized picture coding type\n");
+      customprint("Get_macroblock_type(): unrecognized picture coding type\n");
       break;
     }
   }
@@ -81,56 +80,56 @@ int Get_macroblock_type()
   return macroblock_type;
 }
 
-static int Get_I_macroblock_type()
+int Get_I_macroblock_type()
 {
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(I) ");
-#endif /* TRACE */
+    customprint("macroblock_type(I) ");
+#endif
 
   if (Get_Bits1())
   {
 #ifdef TRACE
     if (Trace_Flag)
-      printf("(1): Intra (1)\n");
-#endif /* TRACE */
+      customprint("(1): Intra (1)\n");
+#endif
     return 1;
   }
 
   if (!Get_Bits1())
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
   }
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("(01): Intra, Quant (17)\n");
-#endif /* TRACE */
+    customprint("(01): Intra, Quant (17)\n");
+#endif
 
   return 17;
 }
 
-static char *MBdescr[]={
-  "",                  "Intra",        "No MC, Coded",         "",
-  "Bwd, Not Coded",    "",             "Bwd, Coded",           "",
-  "Fwd, Not Coded",    "",             "Fwd, Coded",           "",
-  "Interp, Not Coded", "",             "Interp, Coded",        "",
-  "",                  "Intra, Quant", "No MC, Coded, Quant",  "",
-  "",                  "",             "Bwd, Coded, Quant",    "",
-  "",                  "",             "Fwd, Coded, Quant",    "",
-  "",                  "",             "Interp, Coded, Quant", ""
-};
+//char *MBdescr[]={
+//  "",                  "Intra",        "No MC, Coded",         "",
+//  "Bwd, Not Coded",    "",             "Bwd, Coded",           "",
+//  "Fwd, Not Coded",    "",             "Fwd, Coded",           "",
+//  "Interp, Not Coded", "",             "Interp, Coded",        "",
+//  "",                  "Intra, Quant", "No MC, Coded, Quant",  "",
+//  "",                  "",             "Bwd, Coded, Quant",    "",
+//  "",                  "",             "Fwd, Coded, Quant",    "",
+//  "",                  "",             "Interp, Coded, Quant", ""
+//};
 
-static int Get_P_macroblock_type()
+int Get_P_macroblock_type()
 {
   int code;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(P) (");
-#endif /* TRACE */
+    customprint("macroblock_type(P) (");
+#endif
 
   if ((code = Show_Bits(6))>=8)
   {
@@ -140,16 +139,16 @@ static int Get_P_macroblock_type()
     if (Trace_Flag)
     {
       Print_Bits(code,3,PMBtab0[code].len);
-      printf("): %s (%d)\n",MBdescr[(int)PMBtab0[code].val],PMBtab0[code].val);
+      customprint("): %s (%d)\n",MBdescr[(int)PMBtab0[code].val],PMBtab0[code].val);
     }
-#endif /* TRACE */
+#endif
     return PMBtab0[code].val;
   }
 
   if (code==0)
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -160,21 +159,21 @@ static int Get_P_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,6,PMBtab1[code].len);
-    printf("): %s (%d)\n",MBdescr[(int)PMBtab1[code].val],PMBtab1[code].val);
+    customprint("): %s (%d)\n",MBdescr[(int)PMBtab1[code].val],PMBtab1[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return PMBtab1[code].val;
 }
 
-static int Get_B_macroblock_type()
+int Get_B_macroblock_type()
 {
   int code;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(B) (");
-#endif /* TRACE */
+    customprint("macroblock_type(B) (");
+#endif
 
   if ((code = Show_Bits(6))>=8)
   {
@@ -185,9 +184,9 @@ static int Get_B_macroblock_type()
     if (Trace_Flag)
     {
       Print_Bits(code,4,BMBtab0[code].len);
-      printf("): %s (%d)\n",MBdescr[(int)BMBtab0[code].val],BMBtab0[code].val);
+      customprint("): %s (%d)\n",MBdescr[(int)BMBtab0[code].val],BMBtab0[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return BMBtab0[code].val;
   }
@@ -195,7 +194,7 @@ static int Get_B_macroblock_type()
   if (code==0)
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -206,19 +205,19 @@ static int Get_B_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,6,BMBtab1[code].len);
-    printf("): %s (%d)\n",MBdescr[(int)BMBtab1[code].val],BMBtab1[code].val);
+    customprint("): %s (%d)\n",MBdescr[(int)BMBtab1[code].val],BMBtab1[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return BMBtab1[code].val;
 }
 
-static int Get_D_macroblock_type()
+int Get_D_macroblock_type()
 {
   if (!Get_Bits1())
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag=1;
   }
 
@@ -226,21 +225,21 @@ static int Get_D_macroblock_type()
 }
 
 /* macroblock_type for pictures with spatial scalability */
-static int Get_I_Spatial_macroblock_type()
+int Get_I_Spatial_macroblock_type()
 {
   int code;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(I,spat) (");
-#endif /* TRACE */
+    customprint("macroblock_type(I,spat) (");
+#endif
 
   code = Show_Bits(4);
 
   if (code==0)
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -249,29 +248,29 @@ static int Get_I_Spatial_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,4,spIMBtab[code].len);
-    printf("): %02x\n",spIMBtab[code].val);
+    customprint("): %02x\n",spIMBtab[code].val);
   }
-#endif /* TRACE */
+#endif
 
   Flush_Buffer(spIMBtab[code].len);
   return spIMBtab[code].val;
 }
 
-static int Get_P_Spatial_macroblock_type()
+int Get_P_Spatial_macroblock_type()
 {
   int code;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(P,spat) (");
-#endif /* TRACE */
+    customprint("macroblock_type(P,spat) (");
+#endif
 
   code = Show_Bits(7);
 
   if (code<2)
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -285,9 +284,9 @@ static int Get_P_Spatial_macroblock_type()
     if (Trace_Flag)
     {
       Print_Bits(code,4,spPMBtab0[code].len);
-      printf("): %02x\n",spPMBtab0[code].val);
+      customprint("): %02x\n",spPMBtab0[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return spPMBtab0[code].val;
   }
@@ -298,22 +297,22 @@ static int Get_P_Spatial_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,7,spPMBtab1[code].len);
-    printf("): %02x\n",spPMBtab1[code].val);
+    customprint("): %02x\n",spPMBtab1[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return spPMBtab1[code].val;
 }
 
-static int Get_B_Spatial_macroblock_type()
+int Get_B_Spatial_macroblock_type()
 {
   int code;
   VLCtab *p;
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_type(B,spat) (");
-#endif /* TRACE */
+    customprint("macroblock_type(B,spat) (");
+#endif
 
   code = Show_Bits(9);
 
@@ -326,7 +325,7 @@ static int Get_B_Spatial_macroblock_type()
   else
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -337,28 +336,28 @@ static int Get_B_Spatial_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,9,p->len);
-    printf("): %02x\n",p->val);
+    customprint("): %02x\n",p->val);
   }
-#endif /* TRACE */
+#endif
 
   return p->val;
 }
 
-static int Get_SNR_macroblock_type()
+int Get_SNR_macroblock_type()
 {
   int code;
 
 #ifdef TRACE			/* *CH* */
   if (Trace_Flag)
-    printf("macroblock_type(SNR) (");
-#endif TRACE
+    customprint("macroblock_type(SNR) (");
+#endif
 
   code = Show_Bits(3);
 
   if (code==0)
   {
     if (!Quiet_Flag)
-      printf("Invalid macroblock_type code\n");
+      customprint("Invalid macroblock_type code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -369,9 +368,9 @@ static int Get_SNR_macroblock_type()
   if (Trace_Flag)
   {
     Print_Bits(code,3,SNRMBtab[code].len);
-    printf("): %s (%d)\n",MBdescr[(int)SNRMBtab[code].val],SNRMBtab[code].val);
+    customprint("): %s (%d)\n",MBdescr[(int)SNRMBtab[code].val],SNRMBtab[code].val);
   }
-#endif TRACE
+#endif
 
 
   return SNRMBtab[code].val;
@@ -383,15 +382,15 @@ int Get_motion_code()
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("motion_code (");
-#endif /* TRACE */
+    customprint("motion_code (");
+#endif
 
   if (Get_Bits1())
   {
 #ifdef TRACE
     if (Trace_Flag)
-      printf("0): 0\n");
-#endif /* TRACE */
+      customprint("0): 0\n");
+#endif
     return 0;
   }
 
@@ -404,10 +403,10 @@ int Get_motion_code()
     if (Trace_Flag)
     {
       Print_Bits(code,3,MVtab0[code].len);
-      printf("%d): %d\n",
+      customprint("%d): %d\n",
         Show_Bits(1),Show_Bits(1)?-MVtab0[code].val:MVtab0[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return Get_Bits1()?-MVtab0[code].val:MVtab0[code].val;
   }
@@ -421,10 +420,10 @@ int Get_motion_code()
     if (Trace_Flag)
     {
       Print_Bits(code,6,MVtab1[code].len);
-      printf("%d): %d\n",
+      customprint("%d): %d\n",
         Show_Bits(1),Show_Bits(1)?-MVtab1[code].val:MVtab1[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return Get_Bits1()?-MVtab1[code].val:MVtab1[code].val;
   }
@@ -433,7 +432,7 @@ int Get_motion_code()
   {
     if (!Quiet_Flag)
 /* HACK */
-      printf("Invalid motion_vector code (MBA %d, pic %d)\n", global_MBA, global_pic);
+      customprint("Invalid motion_vector code (MBA %d, pic %d)\n", global_MBA, global_pic);
     Fault_Flag=1;
     return 0;
   }
@@ -444,10 +443,10 @@ int Get_motion_code()
   if (Trace_Flag)
   {
     Print_Bits(code+12,9,MVtab2[code].len);
-    printf("%d): %d\n",
+    customprint("%d): %d\n",
       Show_Bits(1),Show_Bits(1)?-MVtab2[code].val:MVtab2[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return Get_Bits1() ? -MVtab2[code].val : MVtab2[code].val;
 }
@@ -457,23 +456,23 @@ int Get_dmvector()
 {
 #ifdef TRACE
   if (Trace_Flag)
-    printf("dmvector (");
-#endif /* TRACE */
+    customprint("dmvector (");
+#endif
 
   if (Get_Bits(1))
   {
 #ifdef TRACE
     if (Trace_Flag)
-      printf(Show_Bits(1) ? "11): -1\n" : "10): 1\n");
-#endif /* TRACE */
+      customprint(Show_Bits(1) ? "11): -1\n" : "10): 1\n");
+#endif
     return Get_Bits(1) ? -1 : 1;
   }
   else
   {
 #ifdef TRACE
     if (Trace_Flag)
-      printf("0): 0\n");
-#endif /* TRACE */
+      customprint("0): 0\n");
+#endif
     return 0;
   }
 }
@@ -484,8 +483,8 @@ int Get_coded_block_pattern()
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("coded_block_pattern_420 (");
-#endif /* TRACE */
+    customprint("coded_block_pattern_420 (");
+#endif
 
   if ((code = Show_Bits(9))>=128)
   {
@@ -496,11 +495,11 @@ int Get_coded_block_pattern()
     if (Trace_Flag)
     {
       Print_Bits(code,5,CBPtab0[code].len);
-      printf("): ");
+      customprint("): ");
       Print_Bits(CBPtab0[code].val,6,6);
-      printf(" (%d)\n",CBPtab0[code].val);
+      customprint(" (%d)\n",CBPtab0[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return CBPtab0[code].val;
   }
@@ -514,11 +513,11 @@ int Get_coded_block_pattern()
     if (Trace_Flag)
     {
       Print_Bits(code,8,CBPtab1[code].len);
-      printf("): ");
+      customprint("): ");
       Print_Bits(CBPtab1[code].val,6,6);
-      printf(" (%d)\n",CBPtab1[code].val);
+      customprint(" (%d)\n",CBPtab1[code].val);
     }
-#endif /* TRACE */
+#endif
 
     return CBPtab1[code].val;
   }
@@ -526,7 +525,7 @@ int Get_coded_block_pattern()
   if (code<1)
   {
     if (!Quiet_Flag)
-      printf("Invalid coded_block_pattern code\n");
+      customprint("Invalid coded_block_pattern code\n");
     Fault_Flag = 1;
     return 0;
   }
@@ -537,11 +536,11 @@ int Get_coded_block_pattern()
   if (Trace_Flag)
   {
     Print_Bits(code,9,CBPtab2[code].len);
-    printf("): ");
+    customprint("): ");
     Print_Bits(CBPtab2[code].val,6,6);
-    printf(" (%d)\n",CBPtab2[code].val);
+    customprint(" (%d)\n",CBPtab2[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return CBPtab2[code].val;
 }
@@ -552,8 +551,8 @@ int Get_macroblock_address_increment()
 
 #ifdef TRACE
   if (Trace_Flag)
-    printf("macroblock_address_increment (");
-#endif /* TRACE */
+    customprint("macroblock_address_increment (");
+#endif
 
   val = 0;
 
@@ -565,15 +564,15 @@ int Get_macroblock_address_increment()
       {
 #ifdef TRACE
         if (Trace_Flag)
-          printf("00000001000 ");
-#endif /* TRACE */
+          customprint("00000001000 ");
+#endif
 
         val+= 33;
       }
       else
       {
         if (!Quiet_Flag)
-          printf("Invalid macroblock_address_increment code\n");
+          customprint("Invalid macroblock_address_increment code\n");
 
         Fault_Flag = 1;
         return 1;
@@ -583,8 +582,8 @@ int Get_macroblock_address_increment()
     {
 #ifdef TRACE
       if (Trace_Flag)
-        printf("00000001111 ");
-#endif /* TRACE */
+        customprint("00000001111 ");
+#endif
     }
 
     Flush_Buffer(11);
@@ -597,8 +596,8 @@ int Get_macroblock_address_increment()
     Flush_Buffer(1);
 #ifdef TRACE
     if (Trace_Flag)
-      printf("1): %d\n",val+1);
-#endif /* TRACE */
+      customprint("1): %d\n",val+1);
+#endif
     return val + 1;
   }
 
@@ -613,9 +612,9 @@ int Get_macroblock_address_increment()
     if (Trace_Flag)
     {
       Print_Bits(code,5,MBAtab1[code].len);
-      printf("): %d\n",val+MBAtab1[code].val);
+      customprint("): %d\n",val+MBAtab1[code].val);
     }
-#endif /* TRACE */
+#endif
 
     
     return val + MBAtab1[code].val;
@@ -629,9 +628,9 @@ int Get_macroblock_address_increment()
   if (Trace_Flag)
   {
     Print_Bits(code+24,11,MBAtab2[code].len);
-    printf("): %d\n",val+MBAtab2[code].val);
+    customprint("): %d\n",val+MBAtab2[code].val);
   }
-#endif /* TRACE */
+#endif
 
   return val + MBAtab2[code].val;
 }
@@ -653,9 +652,9 @@ int Get_Luma_DC_dct_diff()
 #ifdef TRACE
 /*
   if (Trace_Flag)
-    printf("dct_dc_size_luminance: (");
+    customprint("dct_dc_size_luminance: (");
 */
-#endif /* TRACE */
+#endif
 
   /* decode length */
   code = Show_Bits(5);
@@ -669,10 +668,10 @@ int Get_Luma_DC_dct_diff()
     if (Trace_Flag)
     {
       Print_Bits(code,5,DClumtab0[code].len);
-      printf("): %d",size);
+      customprint("): %d",size);
     }
 */
-#endif /* TRACE */
+#endif
   }
   else
   {
@@ -685,18 +684,18 @@ int Get_Luma_DC_dct_diff()
     if (Trace_Flag)
     {
       Print_Bits(code+0x1f0,9,DClumtab1[code].len);
-      printf("): %d",size);
+      customprint("): %d",size);
     }
 */
-#endif /* TRACE */
+#endif
   }
 
 #ifdef TRACE
 /*
   if (Trace_Flag)
-    printf(", dct_dc_differential (");
+    customprint(", dct_dc_differential (");
 */
-#endif /* TRACE */
+#endif
 
   if (size==0)
     dct_diff = 0;
@@ -708,7 +707,7 @@ int Get_Luma_DC_dct_diff()
     if (Trace_Flag)
       Print_Bits(dct_diff,size,size);
 */
-#endif /* TRACE */
+#endif
     if ((dct_diff & (1<<(size-1)))==0)
       dct_diff-= (1<<size) - 1;
   }
@@ -716,9 +715,9 @@ int Get_Luma_DC_dct_diff()
 #ifdef TRACE
 /*
   if (Trace_Flag)
-    printf("): %d\n",dct_diff);
+    customprint("): %d\n",dct_diff);
 */
-#endif /* TRACE */
+#endif
 
   return dct_diff;
 }
@@ -731,9 +730,9 @@ int Get_Chroma_DC_dct_diff()
 #ifdef TRACE
 /*
   if (Trace_Flag)
-    printf("dct_dc_size_chrominance: (");
+    customprint("dct_dc_size_chrominance: (");
 */
-#endif /* TRACE */
+#endif
 
   /* decode length */
   code = Show_Bits(5);
@@ -748,10 +747,10 @@ int Get_Chroma_DC_dct_diff()
     if (Trace_Flag)
     {
       Print_Bits(code,5,DCchromtab0[code].len);
-      printf("): %d",size);
+      customprint("): %d",size);
     }
 */
-#endif /* TRACE */
+#endif
   }
   else
   {
@@ -764,18 +763,18 @@ int Get_Chroma_DC_dct_diff()
     if (Trace_Flag)
     {
       Print_Bits(code+0x3e0,10,DCchromtab1[code].len);
-      printf("): %d",size);
+      customprint("): %d",size);
     }
 */
-#endif /* TRACE */
+#endif
   }
 
 #ifdef TRACE
 /* 
   if (Trace_Flag)
-    printf(", dct_dc_differential (");
+    customprint(", dct_dc_differential (");
 */
-#endif /* TRACE */
+#endif
 
   if (size==0)
     dct_diff = 0;
@@ -787,7 +786,7 @@ int Get_Chroma_DC_dct_diff()
     if (Trace_Flag)
       Print_Bits(dct_diff,size,size);
 */
-#endif /* TRACE */
+#endif
     if ((dct_diff & (1<<(size-1)))==0)
       dct_diff-= (1<<size) - 1;
   }
@@ -795,9 +794,9 @@ int Get_Chroma_DC_dct_diff()
 #ifdef TRACE
 /*
   if (Trace_Flag)
-    printf("): %d\n",dct_diff);
+    customprint("): %d\n",dct_diff);
 */
-#endif /* TRACE */
+#endif
 
   return dct_diff;
 }

@@ -28,44 +28,44 @@
  */
 
 #include "BuildType.h"
-#ifndef  GBA
+
 #include <stdio.h>
 #include <stdlib.h>
-#endif // ! GBA
+
 
 #include "config.h"
 #include "global.h"
 
 /* private prototypes*/
-static void picture_data _ANSI_ARGS_((int framenum));
-static void macroblock_modes _ANSI_ARGS_((int *pmacroblock_type, int *pstwtype,
+void picture_data _ANSI_ARGS_((int framenum));
+void macroblock_modes _ANSI_ARGS_((int *pmacroblock_type, int *pstwtype,
   int *pstwclass, int *pmotion_type, int *pmotion_vector_count, int *pmv_format, int *pdmv,
   int *pmvscale, int *pdct_type));
-static void Clear_Block _ANSI_ARGS_((int comp));
-static void Sum_Block _ANSI_ARGS_((int comp));
-static void Saturate _ANSI_ARGS_((short *bp));
-static void Add_Block _ANSI_ARGS_((int comp, int bx, int by,
+void Clear_Block _ANSI_ARGS_((int comp));
+void Sum_Block _ANSI_ARGS_((int comp));
+void Saturate _ANSI_ARGS_((short *bp));
+void Add_Block _ANSI_ARGS_((int comp, int bx, int by,
   int dct_type, int addflag));
-static void Update_Picture_Buffers _ANSI_ARGS_((void));
-static void frame_reorder _ANSI_ARGS_((int bitstream_framenum, 
+void Update_Picture_Buffers _ANSI_ARGS_((void));
+void frame_reorder _ANSI_ARGS_((int bitstream_framenum, 
   int sequence_framenum));
-static void Decode_SNR_Macroblock _ANSI_ARGS_((int *SNRMBA, int *SNRMBAinc, 
+void Decode_SNR_Macroblock _ANSI_ARGS_((int *SNRMBA, int *SNRMBAinc, 
   int MBA, int MBAmax, int *dct_type));
 
-static void motion_compensation _ANSI_ARGS_((int MBA, int macroblock_type, 
+void motion_compensation _ANSI_ARGS_((int MBA, int macroblock_type, 
  int motion_type, int PMV[2][2][2], int motion_vertical_field_select[2][2], 
  int dmvector[2], int stwtype, int dct_type));
 
-static void skipped_macroblock _ANSI_ARGS_((int dc_dct_pred[3], 
+void skipped_macroblock _ANSI_ARGS_((int dc_dct_pred[3], 
   int PMV[2][2][2], int *motion_type, int motion_vertical_field_select[2][2],
   int *stwtype, int *macroblock_type));
 
-static int slice _ANSI_ARGS_((int framenum, int MBAmax));
+int slice _ANSI_ARGS_((int framenum, int MBAmax));
 
-static int start_of_slice _ANSI_ARGS_ ((int MBAmax, int *MBA,
+int start_of_slice _ANSI_ARGS_ ((int MBAmax, int *MBA,
   int *MBAinc, int dc_dct_pred[3], int PMV[2][2][2]));
 
-static int decode_macroblock _ANSI_ARGS_((int *macroblock_type, 
+int decode_macroblock _ANSI_ARGS_((int *macroblock_type, 
   int *stwtype, int *stwclass, int *motion_type, int *dct_type,
   int PMV[2][2][2], int dc_dct_pred[3], 
   int motion_vertical_field_select[2][2], int dmvector[2]));
@@ -119,7 +119,7 @@ int bitstream_framenum, sequence_framenum;
 
 /* decode all macroblocks of the current picture */
 /* stages described in ISO/IEC 13818-2 section 7 */
-static void picture_data(framenum)
+void picture_data(framenum)
 int framenum;
 {
   int MBAmax;
@@ -143,7 +143,7 @@ int framenum;
 
 /* decode all macroblocks of the current picture */
 /* ISO/IEC 13818-2 section 6.3.16 */
-static int slice(framenum, MBAmax)
+int slice(framenum, MBAmax)
 int framenum, MBAmax;
 {
   int MBA; 
@@ -272,7 +272,7 @@ resync: /* if Fault_Flag: resynchronize to next next_start_code */
 
  
 /* ISO/IEC 13818-2 section 6.3.17.1: Macroblock modes */
-static void macroblock_modes(pmacroblock_type,pstwtype,pstwclass,
+void macroblock_modes(pmacroblock_type,pstwtype,pstwclass,
   pmotion_type,pmotion_vector_count,pmv_format,pdmv,pmvscale,pdct_type)
   int *pmacroblock_type, *pstwtype, *pstwclass;
   int *pmotion_type, *pmotion_vector_count, *pmv_format, *pdmv, *pmvscale;
@@ -283,9 +283,9 @@ static void macroblock_modes(pmacroblock_type,pstwtype,pstwclass,
   int motion_type = 0;
   int motion_vector_count, mv_format, dmv, mvscale;
   int dct_type;
-  static unsigned char stwc_table[3][4]
+  unsigned char stwc_table[3][4]
     = { {6,3,7,4}, {2,1,5,4}, {2,5,7,4} };
-  static unsigned char stwclass_table[9]
+  unsigned char stwclass_table[9]
     = {0, 1, 2, 1, 1, 2, 3, 3, 4};
 
   /* get macroblock_type */
@@ -422,7 +422,7 @@ static void macroblock_modes(pmacroblock_type,pstwtype,pstwclass,
  *   - ISO/IEC 13818-2 section 7.6.7: Combining predictions
  *   - ISO/IEC 13818-2 section 6.1.3: Macroblock
 */
-static void Add_Block(comp,bx,by,dct_type,addflag)
+void Add_Block(comp,bx,by,dct_type,addflag)
 int comp,bx,by,dct_type,addflag;
 {
   int cc,i, j, iincr;
@@ -525,7 +525,7 @@ int comp,bx,by,dct_type,addflag;
 
 
 /* ISO/IEC 13818-2 section 7.8 */
-static void Decode_SNR_Macroblock(SNRMBA, SNRMBAinc, MBA, MBAmax, dct_type)
+void Decode_SNR_Macroblock(SNRMBA, SNRMBAinc, MBA, MBAmax, dct_type)
   int *SNRMBA, *SNRMBAinc;
   int MBA, MBAmax;
   int *dct_type;
@@ -636,7 +636,7 @@ static void Decode_SNR_Macroblock(SNRMBA, SNRMBAinc, MBA, MBAmax, dct_type)
 
 
 /* IMPLEMENTATION: set scratch pad macroblock to zero */
-static void Clear_Block(comp)
+void Clear_Block(comp)
 int comp;
 {
   short *Block_Ptr;
@@ -651,7 +651,7 @@ int comp;
 
 /* SCALABILITY: add SNR enhancement layer block data to base layer */
 /* ISO/IEC 13818-2 section 7.8.3.4: Addition of coefficients from the two layes */
-static void Sum_Block(comp)
+void Sum_Block(comp)
 int comp;
 {
   short *Block_Ptr1, *Block_Ptr2;
@@ -667,7 +667,7 @@ int comp;
 
 /* limit coefficients to -2048..2047 */
 /* ISO/IEC 13818-2 section 7.4.3 and 7.4.4: Saturation and Mismatch control */
-static void Saturate(Block_Ptr)
+void Saturate(Block_Ptr)
 short *Block_Ptr;
 {
   int i, sum, val;
@@ -697,7 +697,7 @@ short *Block_Ptr;
 
 /* reuse old picture buffers as soon as they are no longer needed 
    based on life-time axioms of MPEG */
-static void Update_Picture_Buffers()
+void Update_Picture_Buffers()
 {                           
   int cc;              /* color component index */
   unsigned char *tmp;  /* temporary swap pointer */
@@ -755,11 +755,12 @@ int Framenum;
 
 
 
-static void frame_reorder(Bitstream_Framenum, Sequence_Framenum)
+void frame_reorder(Bitstream_Framenum, Sequence_Framenum)
 int Bitstream_Framenum, Sequence_Framenum;
 {
   /* tracking variables to insure proper output in spatial scalability */
-  static int Oldref_progressive_frame, Newref_progressive_frame;
+    int Oldref_progressive_frame = 0;
+    int  Newref_progressive_frame = 0;
 
   if (Sequence_Framenum!=0)
   {
@@ -792,7 +793,7 @@ int Bitstream_Framenum, Sequence_Framenum;
 
 
 /* ISO/IEC 13818-2 section 7.6 */
-static void motion_compensation(MBA, macroblock_type, motion_type, PMV, 
+void motion_compensation(MBA, macroblock_type, motion_type, PMV, 
   motion_vertical_field_select, dmvector, stwtype, dct_type)
 int MBA;
 int macroblock_type;
@@ -850,7 +851,7 @@ int dct_type;
 
 
 /* ISO/IEC 13818-2 section 7.6.6 */
-static void skipped_macroblock(dc_dct_pred, PMV, motion_type, 
+void skipped_macroblock(dc_dct_pred, PMV, motion_type, 
   motion_vertical_field_select, stwtype, macroblock_type)
 int dc_dct_pred[3];
 int PMV[2][2][2];
@@ -905,7 +906,7 @@ int *macroblock_type;
 /* return==-1 means go to next picture */
 /* the expression "start of slice" is used throughout the normative
    body of the MPEG specification */
-static int start_of_slice(MBAmax, MBA, MBAinc, 
+int start_of_slice(MBAmax, MBA, MBAinc, 
   dc_dct_pred, PMV)
 int MBAmax;
 int *MBA;
@@ -993,7 +994,7 @@ int PMV[2][2][2];
 
 
 /* ISO/IEC 13818-2 sections 7.2 through 7.5 */
-static int decode_macroblock(macroblock_type, stwtype, stwclass,
+int decode_macroblock(macroblock_type, stwtype, stwclass,
   motion_type, dct_type, PMV, dc_dct_pred, 
   motion_vertical_field_select, dmvector)
 int *macroblock_type; 
